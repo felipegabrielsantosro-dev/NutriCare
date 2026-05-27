@@ -1,0 +1,393 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   SMALL BOX WIDGET - ENHANCED DESIGN SYSTEM
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+    /* Cores Premium */
+    --warning-gradient-start: #ffc107;
+    --warning-gradient-end: #ff9800;
+    --warning-dark: #ff8c00;
+    --warning-light: #ffd663;
+
+    /* Efeitos */
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.12);
+    --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.15);
+    --shadow-hover: 0 20px 50px rgba(255, 152, 0, 0.25);
+
+    /* Transições */
+    --transition-fast: 0.2s ease-out;
+    --transition-smooth: 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    --transition-ease: 0.3s ease-in-out;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CONTAINER PRINCIPAL
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.small-box {
+    position: relative;
+    overflow: hidden;
+    border-radius: 16px;
+    padding: 28px;
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: all var(--transition-smooth);
+    border: none;
+    background: linear-gradient(135deg, var(--warning-gradient-start) 0%, var(--warning-gradient-end) 100%) !important;
+    box-shadow: var(--shadow-md);
+    backdrop-filter: blur(10px);
+    position: relative;
+}
+
+/* Efeito de Background Animado - Gradiente Dinâmico */
+.small-box::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg,
+            rgba(255, 255, 255, 0.1) 0%,
+            rgba(255, 255, 255, 0) 50%,
+            rgba(0, 0, 0, 0.05) 100%);
+    pointer-events: none;
+    border-radius: 16px;
+}
+
+/* Overlay Brilhante no Hover */
+.small-box::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity var(--transition-ease);
+    pointer-events: none;
+}
+
+/* Estado Hover - Transformação Premium */
+.small-box:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: var(--shadow-hover);
+}
+
+.small-box:hover::after {
+    opacity: 1;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CONTEÚDO INTERNO
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.small-box .inner {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   NÚMERO PRINCIPAL (H3)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.small-box h3 {
+    font-size: 52px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin: 0;
+    color: #fff;
+    text-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    line-height: 1;
+
+    /* Animação ao carregar */
+    animation: slideInNumber 0.6s var(--transition-smooth) backwards;
+}
+
+@keyframes slideInNumber {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.small-box:hover h3 {
+    animation: numberPulse 0.4s ease-out;
+}
+
+@keyframes numberPulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.08);
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RÓTULO (P)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.small-box p {
+    font-size: 16px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.95);
+    margin: 0;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+
+    /* Animação ao carregar */
+    animation: slideInLabel 0.6s var(--transition-smooth) 0.1s backwards;
+}
+
+@keyframes slideInLabel {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ÍCONE SVG
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.small-box-icon {
+    width: 90px;
+    height: 90px;
+    color: rgba(255, 255, 255, 0.25);
+    position: absolute;
+    right: 20px;
+    top: 15px;
+    opacity: 0.7;
+    transition: all var(--transition-ease);
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+}
+
+.small-box:hover .small-box-icon {
+    transform: rotate(-15deg) scale(1.15);
+    color: rgba(255, 255, 255, 0.35);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LINK "MORE INFO"
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.small-box-footer {
+    position: relative;
+    z-index: 2;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 2px solid rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.85) !important;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all var(--transition-ease);
+    letter-spacing: 0.3px;
+}
+
+.small-box-footer:hover {
+    color: #fff !important;
+    padding-right: 8px;
+}
+
+.small-box-footer i {
+    display: inline-block;
+    transition: transform var(--transition-ease);
+    opacity: 0.8;
+}
+
+.small-box-footer:hover i {
+    transform: translateX(4px) rotate(45deg);
+    opacity: 1;
+}
+
+/* Linha de hover para o link */
+.small-box-footer::before {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.6);
+    transition: width var(--transition-ease);
+}
+
+.small-box-footer:hover::before {
+    width: 100%;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   EFEITO DE PARTÍCULAS DECORATIVAS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.small-box::before {
+    background:
+        radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.05) 0%, transparent 50%),
+        linear-gradient(135deg,
+            rgba(255, 255, 255, 0.1) 0%,
+            rgba(255, 255, 255, 0) 50%,
+            rgba(0, 0, 0, 0.05) 100%);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   VARIANTES DE COR (Se usado com outras classes)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.text-bg-success.small-box {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+}
+
+.text-bg-success.small-box:hover {
+    box-shadow: 0 20px 50px rgba(40, 167, 69, 0.25);
+}
+
+.text-bg-danger.small-box {
+    background: linear-gradient(135deg, #dc3545 0%, #ff6b6b 100%) !important;
+}
+
+.text-bg-danger.small-box:hover {
+    box-shadow: 0 20px 50px rgba(220, 53, 69, 0.25);
+}
+
+.text-bg-info.small-box {
+    background: linear-gradient(135deg, #17a2b8 0%, #00bcd4 100%) !important;
+}
+
+.text-bg-info.small-box:hover {
+    box-shadow: 0 20px 50px rgba(23, 162, 184, 0.25);
+}
+
+.text-bg-primary.small-box {
+    background: linear-gradient(135deg, #007bff 0%, #5dade2 100%) !important;
+}
+
+.text-bg-primary.small-box:hover {
+    box-shadow: 0 20px 50px rgba(0, 123, 255, 0.25);
+}
+
+.text-bg-secondary.small-box {
+    background: linear-gradient(135deg, #6c757d 0%, #a6acaf 100%) !important;
+}
+
+.text-bg-secondary.small-box:hover {
+    box-shadow: 0 20px 50px rgba(108, 117, 125, 0.25);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RESPONSIVIDADE
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+    .small-box {
+        padding: 24px;
+        min-height: 160px;
+    }
+
+    .small-box h3 {
+        font-size: 40px;
+    }
+
+    .small-box p {
+        font-size: 14px;
+    }
+
+    .small-box-icon {
+        width: 70px;
+        height: 70px;
+        right: 12px;
+        top: 12px;
+    }
+
+    .small-box:hover {
+        transform: translateY(-4px) scale(1.01);
+    }
+}
+
+@media (max-width: 576px) {
+    .small-box {
+        padding: 20px;
+        min-height: 140px;
+    }
+
+    .small-box h3 {
+        font-size: 32px;
+    }
+
+    .small-box p {
+        font-size: 12px;
+    }
+
+    .small-box-icon {
+        width: 60px;
+        height: 60px;
+        right: 8px;
+        top: 8px;
+    }
+
+    .small-box-footer {
+        font-size: 12px;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ACESSIBILIDADE
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .small-box,
+    .small-box h3,
+    .small-box p,
+    .small-box-icon,
+    .small-box-footer {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+
+/* Focus para navegação por teclado */
+.small-box-footer:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.5);
+    outline-offset: 2px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TEMAS ESCUROS (Se aplicável)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (prefers-color-scheme: dark) {
+    .small-box {
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    }
+
+    .small-box:hover {
+        box-shadow: 0 20px 50px rgba(255, 152, 0, 0.35);
+    }
+}

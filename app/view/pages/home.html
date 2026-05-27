@@ -1,0 +1,52 @@
+{% extends "layouts/main.html" %}
+
+{% block title %}DESKIVO — Home{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="file:///{{ assets }}/css/home.css">
+{% endblock %}
+
+{% block menu %}
+{% include "../partial/header.html" %}
+{% endblock %}
+
+{% block content %}
+<h1>Painel Principal</h1>
+<div class="row p-3">
+    <div class="col-lg-6 col-6">
+        <div class="small-box text-bg-primary" onclick="api.window.open('pages/list-product', { title: 'Produtos' })">
+            <div class="inner">
+                <h3>150</h3>
+                <p>Produtos</p>
+            </div>
+            <i class="fa-solid fa-barcode fa-2xl"></i>
+            <a href="#" class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
+                Mais informações <i class="bi bi-link-45deg"></i>
+            </a>
+        </div>
+    </div>
+    <div class="col-lg-6 col-6">
+        <div class="small-box text-bg-warning" onclick="api.window.open('pages/list-customer', { title: 'Clientes' })">
+            <div class="inner">
+                <h3>44</h3>
+                <p>Clientes</p>
+            </div>
+            <i class="fa-solid fa-user-group fa-2xl"></i>
+            <a href="#" class="small-box-footer link-dark link-underline-opacity-0 link-underline-opacity-50-hover">
+                Mais informações <i class="bi bi-link-45deg"></i>
+            </a>
+        </div>
+    </div>
+</div>
+<!--<button onclick="api.window.open('pages/list-customer', { title: 'Clientes' })">
+    Clientes
+</button>
+
+<button onclick="api.window.openModal('pages/customer', { width: 900, height: 600, title: 'Cadastro' })">
+    Cadastro
+</button>
+
+<button onclick="api.window.openModal('pages/list-customer', { width: 900, height: 600, title: 'Clientes' })">
+    Clientes (Modal)
+</button>-->
+{% endblock %}

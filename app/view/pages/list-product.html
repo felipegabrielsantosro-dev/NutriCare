@@ -1,0 +1,41 @@
+{% extends "layouts/main.html" %}
+
+{% block title %}Produtos{% endblock %}
+
+{% block content %}
+<h2>Lista de Produtos</h2>
+<div class="row">
+    <div class="col-12 mb-2">
+        <button class="btn btn-success"
+            onclick="api.window.open('pages/product', { width: 1200, height: 550, title: 'Cadastrar produto' })">
+            <i class="fa-solid fa-plus"></i>
+            Novo produto
+        </button>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12">
+        <table id="table-products" class="table table-striped table-hover table-bordered" style="width: 100%;">
+            <thead>
+                <tr>
+                    <th>Código</th>
+                    <th>Nome</th>
+                    <th>Cód. barra</th>
+                    <th>Unidade</th>
+                    <th>Preço de compra</th>
+                    <th>Preço de venda</th>
+                    <th>Ativo</th>
+                    <th>Criado em</th>
+                    <th>Atualizado em</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script defer type="module" src="file:///{{ assets }}/js/list-product.js"></script>
+{% endblock %}
