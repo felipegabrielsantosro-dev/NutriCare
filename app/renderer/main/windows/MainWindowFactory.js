@@ -28,7 +28,7 @@ class MainWindowFactory {
 
     // Janela Cliente
     static createClientWindow() {
-        return this.#createWindow('client.html');
+        return this.#createWindow('users.html');
     }
 }
 

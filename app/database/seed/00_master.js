@@ -29,7 +29,6 @@ exports.seed = async function (knex) {
       sexo: 'M',
       altura: 1.75,
       peso: 70,
-      objetivo: 'ganhar massa'
     },
     {
       id: 2,
@@ -40,7 +39,6 @@ exports.seed = async function (knex) {
       sexo: 'M',
       altura: 1.80,
       peso: 80,
-      objetivo: 'perder peso'
     }
   ]);
 
@@ -79,15 +77,13 @@ exports.seed = async function (knex) {
     {
       id: 1,
       usuario_id: 1,
-      nome: 'Dieta Hipertrofia',
-      objetivo: 'ganhar massa',
+      nome: 'Dieta Hipertrofia',  
       calorias_totais: 2800
     },
     {
       id: 2,
       usuario_id: 2,
       nome: 'Dieta Definição',
-      objetivo: 'perder peso',
       calorias_totais: 1800
     }
   ]);
