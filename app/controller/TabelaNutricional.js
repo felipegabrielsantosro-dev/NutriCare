@@ -1,7 +1,7 @@
 import connection from '../database/Connection.js';
-export default class Product {
+export default class TabelaNutricional {
     // Tabela no banco
-    static table = 'product';
+    static table = 'tabela-nutricional';
     // Mapeamento: índice da coluna no DataTable → nome no banco
     static #columns = ['id', 'nome', 'codigo_barra', 'unidade', 'preco_compra', 'preco_venda', 'ativo', 'criado_em', 'atualizado_em', null];
     // Colunas pesquisáveis pelo termo de busca
@@ -10,13 +10,13 @@ export default class Product {
     static async find(data = {}) {
         const { term = '', limit = 10, offset = 0, orderType = 'asc', column = 0, draw = 1 } = data;
         //Total sem filtro
-        const [{ count: total }] = await connection(Product.table).count('id as count');
+        const [{ count: total }] = await connection(TabelaNutricional.table).count('id as count');
         //Monta WHERE da busca
         const search = term?.trim();
         function applySearch(query) {
             if (search) {
                 query.where(function () {
-                    for (const col of Product.#searchable) {
+                    for (const col of TabelaNutricional.#searchable) {
                         this.orWhereRaw(`CAST("${col}" AS TEXT) ILIKE ?`, [`%${search}%`]);
                     }
                 });
@@ -24,13 +24,13 @@ export default class Product {
             return query;
         }
         // Total filtrado
-        const filteredQ = connection(Product.table).count('id as count');
+        const filteredQ = connection(TabelaNutricional.table).count('id as count');
         applySearch(filteredQ);
         const [{ count: filtered }] = await filteredQ;
         // Dados paginados
-        const orderColumn = Product.#columns[column] || 'id';
+        const orderColumn = TabelaNutricional.#columns[column] || 'id';
         const orderDir = orderType === 'desc' ? 'desc' : 'asc';
-        const dataQ = connection(Product.table).select('*');
+        const dataQ = connection(TabelaNutricional.table).select('*');
         applySearch(dataQ);
         dataQ.orderBy(orderColumn, orderDir);
         dataQ.limit(parseInt(limit));
@@ -46,7 +46,7 @@ export default class Product {
     //Retorna apenas um produto pelo seu ID
     static async findById(id) {
         if (!id) return null;
-        const row = await connection(Product.table)
+        const row = await connection(TabelaNutricional.table)
             .where({ id })
             .first();
         return row || null;

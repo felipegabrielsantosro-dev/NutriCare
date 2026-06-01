@@ -5,13 +5,14 @@ api.users.onReload(() => {
 });
 
 // Inicializa a tabela
-Datatables.SetTable('#users', [
+Datatables.SetTable('#table-users', [
+    { data: 'id' },
+    { data: 'nome' },
+    { data: 'email' },
     { data: 'sexo' },
     { data: 'idade' },
     { data: 'altura' },
     { data: 'peso' },
-    { data: 'ativo' },
-    { data: 'data_criacao' },
     {
         data: null,
         orderable: false,

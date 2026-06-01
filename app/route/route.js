@@ -1,7 +1,7 @@
 import { ipcMain, BrowserWindow } from 'electron';
 import Template from '../mixin/Template.js';
 import Users from '../controller/Users.js';
-import Product from '../controller/Product.js';
+import TabelaNutricional from '../controller/TabelaNutricional.js';
 import { Print } from '../mixin/Print.js';
 
 function getWin(event) {
@@ -77,10 +77,25 @@ ipcMain.handle('users:delete', async (_e, id) => {
     return result;
 });
 
-ipcMain.handle('product:find', async (_e, where = {}) => {
-    return await Product.find(where);
+//  tabela nutricional
+ipcMain.handle('tabela-nutricional:insert', async (_e, data) => {
+    const result = await TabelaNutricional.insert(data);
+    if (result.status) broadcastReload('tabela-nutricional:reload');
+    return result;
 });
-ipcMain.handle('product:findById', async (_e, id) => {
-    return await Product.findById(id);
+ipcMain.handle('tabela-nutricional:find', async (_e, where = {}) => {
+    return await TabelaNutricional.find(where);
 });
-
+ipcMain.handle('tabela-nutricional:findById', async (_e, id) => {
+    return await TabelaNutricional.findById(id);
+});
+ipcMain.handle('tabela-nutricional:update', async (_e, id, data) => {
+    const result = await TabelaNutricional.update(id, data);
+    if (result.status) broadcastReload('tabela-nutricional:reload');
+    return result;
+});
+ipcMain.handle('tabela-nutricional:delete', async (_e, id) => {
+    const result = await TabelaNutricional.delete(id);
+    if (result.status) broadcastReload('tabela-nutricional:reload');
+    return result;
+});

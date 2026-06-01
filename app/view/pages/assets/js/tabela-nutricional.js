@@ -1,9 +1,9 @@
 import { Datatables } from "../components/Datatables.js"
 api.product.onReload(() => {
-    $('#table-products').DataTable().ajax.reload(null, false);
+    $('#tabela-nutricional').DataTable().ajax.reload(null, false);
 });
 // Inicializa a tabela
-Datatables.SetTable('#table-products', [
+Datatables.SetTable('#tabela-nutricional', [
     { data: 'id' },
     { data: 'nome' },
     { data: 'codigo_barra' },
@@ -46,17 +46,17 @@ Datatables.SetTable('#table-products', [
         searchable: false,
         render: function (row) {
             return `
-                <button onclick="editProduct(${row.id})" class="btn btn-xs btn-warning btn-sm">
+                <button onclick="editNutricional(${row.id})" class="btn btn-xs btn-warning btn-sm">
                     <i class="fa-solid fa-pen-to-square"></i> Editar
                 </button>
-                <button onclick="deleteProduct(${row.id})" class="btn btn-xs btn-danger btn-sm">
+                <button onclick="deleteNutricional(${row.id})" class="btn btn-xs btn-danger btn-sm">
                     <i class="fa-solid fa-trash"></i> Excluir
                 </button>
             `;
         }
     }
-]).getData(filter => api.product.find(filter));
-async function deleteProduct(id) {
+]).getData(filter => api.nutricional.find(filter));
+async function deleteNutricional(id) {
     const result = await Swal.fire({
         title: 'Tem certeza?',
         text: 'Esta ação não pode ser desfeita.',
@@ -67,31 +67,31 @@ async function deleteProduct(id) {
     });
 
     if (result.isConfirmed) {
-        const response = await api.product.delete(id);
+        const response = await api.nutricional.delete(id);
 
         if (response.status) {
             toast('success', 'Excluído', response.msg);
-            $('#table-products').DataTable().ajax.reload();
+            $('#tabela-nutricional').DataTable().ajax.reload();
         } else {
             toast('error', 'Erro', response.msg);
         }
     }
 }
-async function editProduct(id) {
+async function editNutricional(id) {
     try {
         // 1. Busca os dados completos do produto
         const product = await api.product.findById(id);
         if (!product) {
-            toast('error', 'Erro', 'Produto não encontrado.');
+            toast('error', 'Erro', 'Tabela Nutricional não encontrado.');
             return;
         }
         // 2. Salva no temp store com a ação 'e' (editar)
-        await api.temp.set('product:edit', {
+        await api.temp.set('nutricional:edit', {
             action: 'e',
             ...product,
         });
         // 3. Abre a modal
-        api.window.openModal('pages/product', {
+        api.window.openModal('pages/nutricional', {
             width: 800,
             height: 420,
             title: 'Editar Produto',
