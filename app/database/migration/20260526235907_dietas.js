@@ -12,8 +12,6 @@ exports.up = function (knex) {
 
     table.string('nome').notNullable();
 
-    table.string('objetivo').notNullable();
-
     table.decimal('calorias_totais', 10, 2).notNullable();
   });
 };

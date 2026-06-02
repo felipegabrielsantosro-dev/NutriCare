@@ -1,7 +1,8 @@
 {
-    "name": "deskivo",
+    "name": "nutricare",
     "version": "1.0.0",
     "main": "main.js",
+    "type": "module",
     "private": true,
     "scripts": {
         "start": "chcp 65001 >nul && electron .",

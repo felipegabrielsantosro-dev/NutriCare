@@ -12,41 +12,56 @@
 
 {% block content %}
 <h1>Painel Principal</h1>
+
 <div class="row p-3">
+
+    <!-- tabela nutricional -->
     <div class="col-lg-6 col-6">
-        <div class="small-box text-bg-primary" onclick="api.window.open('pages/list-product', { title: 'Produtos' })">
-            <div class="inner">
+        <div class="small-box text-bg-primary">
+
+            <div class="inner"
+                 onclick="api.window.open('pages/tabela-nutricional', { title: 'Tabela Nutricional' })"
+                 style="cursor: pointer;">
                 <h3>150</h3>
-                <p>Produtos</p>
+                <p>Tabela Nutricional</p>
             </div>
-            <i class="fa-solid fa-barcode fa-2xl"></i>
-            <a href="#" class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
+
+            <i class="fa-solid fa-barcode fa-2xl"
+               onclick="api.window.open('pages/list-product', { title: 'Tabela Nutricional' })"
+               style="cursor: pointer;"></i>
+
+            <a href="#"
+               onclick="event.preventDefault(); api.window.open('pages/tabela-nutricional', { title: 'Tabela Nutricional' })"
+               class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
                 Mais informações <i class="bi bi-link-45deg"></i>
             </a>
+
         </div>
     </div>
+
+    <!-- USUÁRIOS -->
     <div class="col-lg-6 col-6">
-        <div class="small-box text-bg-warning" onclick="api.window.open('pages/list-customer', { title: 'Clientes' })">
-            <div class="inner">
+        <div class="small-box text-bg-warning">
+
+            <div class="inner"
+                 onclick="api.window.open('pages/list-users', { title: 'Usuários' })"
+                 style="cursor: pointer;">
                 <h3>44</h3>
-                <p>Clientes</p>
+                <p>Usuários</p>
             </div>
-            <i class="fa-solid fa-user-group fa-2xl"></i>
-            <a href="#" class="small-box-footer link-dark link-underline-opacity-0 link-underline-opacity-50-hover">
+
+            <i class="fa-solid fa-users fa-2xl"
+               onclick="api.window.open('pages/list-users', { title: 'Usuários' })"
+               style="cursor: pointer;"></i>
+
+            <a href="#"
+               onclick="event.preventDefault(); api.window.open('pages/list-users', { title: 'Usuários' })"
+               class="small-box-footer link-dark link-underline-opacity-0 link-underline-opacity-50-hover">
                 Mais informações <i class="bi bi-link-45deg"></i>
             </a>
+
         </div>
     </div>
+
 </div>
-<!--<button onclick="api.window.open('pages/list-customer', { title: 'Clientes' })">
-    Clientes
-</button>
-
-<button onclick="api.window.openModal('pages/customer', { width: 900, height: 600, title: 'Cadastro' })">
-    Cadastro
-</button>
-
-<button onclick="api.window.openModal('pages/list-customer', { width: 900, height: 600, title: 'Clientes' })">
-    Clientes (Modal)
-</button>-->
 {% endblock %}

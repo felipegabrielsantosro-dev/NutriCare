@@ -29,7 +29,7 @@ exports.seed = async function (knex) {
       sexo: 'M',
       altura: 1.75,
       peso: 70,
-      objetivo: 'ganhar massa'
+      objetivo: 'Hipertrofia'
     },
     {
       id: 2,
@@ -40,7 +40,7 @@ exports.seed = async function (knex) {
       sexo: 'M',
       altura: 1.80,
       peso: 80,
-      objetivo: 'perder peso'
+      objetivo: 'Definição'
     }
   ]);
 
@@ -79,15 +79,13 @@ exports.seed = async function (knex) {
     {
       id: 1,
       usuario_id: 1,
-      nome: 'Dieta Hipertrofia',
-      objetivo: 'ganhar massa',
+      nome: 'Dieta Hipertrofia',  
       calorias_totais: 2800
     },
     {
       id: 2,
       usuario_id: 2,
       nome: 'Dieta Definição',
-      objetivo: 'perder peso',
       calorias_totais: 1800
     }
   ]);
@@ -137,6 +135,50 @@ exports.seed = async function (knex) {
       percentual_gordura: 15.5
     }
   ]);
+
+// =========================
+// 📋 TABELA NUTRICIONAL
+// =========================
+await knex('tabela_nutricional').insert([
+  {
+    id: 1,
+    usuario_id: 2,
+    produto: 'Arroz Branco Cozido',
+    porcao: '100g',
+    porcoes_embalagem: 10,
+    valor_energetico: 130,
+    carboidratos: 28,
+    acucares_totais: 0.1,
+    acucares_adicionados: 0,
+    proteinas: 2.5,
+    gorduras_totais: 0.3,
+    gorduras_saturadas: 0.1,
+    gorduras_trans: 0,
+    fibra_alimentar: 0.4,
+    sodio: 1,
+    descricao: 'Arroz branco cozido sem sal',
+    ativo: true
+  },
+  {
+    id: 2,
+    usuario_id: 2,
+    produto: 'Peito de Frango Grelhado',
+    porcao: '100g',
+    porcoes_embalagem: 5,
+    valor_energetico: 165,
+    carboidratos: 0,
+    acucares_totais: 0,
+    acucares_adicionados: 0,
+    proteinas: 31,
+    gorduras_totais: 3.6,
+    gorduras_saturadas: 1.0,
+    gorduras_trans: 0,
+    fibra_alimentar: 0,
+    sodio: 70,
+    descricao: 'Peito de frango grelhado sem pele',
+    ativo: true
+  }
+]);
 
   // =========================
   // 🍽 PLANO ALIMENTAR

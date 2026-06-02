@@ -1,7 +1,7 @@
 import { ipcMain, BrowserWindow } from 'electron';
 import Template from '../mixin/Template.js';
-import Customer from '../controller/Customer.js';
-import Product from '../controller/Product.js';
+import Users from '../controller/Users.js';
+import TabelaNutricional from '../controller/TabelaNutricional.js';
 import { Print } from '../mixin/Print.js';
 
 function getWin(event) {
@@ -54,32 +54,48 @@ ipcMain.handle('temp:get', (_e, key) => {
     delete tempData[key];
     return data;
 });
-//  CUSTOMER
-ipcMain.handle('customer:insert', async (_e, data) => {
-    const result = await Customer.insert(data);
-    if (result.status) broadcastReload('customer:reload');
+//  users
+ipcMain.handle('users:insert', async (_e, data) => {
+    const result = await Users.insert(data);
+    if (result.status) broadcastReload('users:reload');
     return result;
 });
-ipcMain.handle('customer:find', async (_e, where = {}) => {
-    return await Customer.find(where);
+ipcMain.handle('users:find', async (_e, where = {}) => {
+    return await Users.find(where);
 });
-ipcMain.handle('customer:findById', async (_e, id) => {
-    return await Customer.findById(id);
+ipcMain.handle('users:findById', async (_e, id) => {
+    return await Users.findById(id);
 });
-ipcMain.handle('customer:update', async (_e, id, data) => {
-    const result = await Customer.update(id, data);
-    if (result.status) broadcastReload('customer:reload');
+ipcMain.handle('users:update', async (_e, id, data) => {
+    const result = await Users.update(id, data);
+    if (result.status) broadcastReload('users:reload');
     return result;
 });
-ipcMain.handle('customer:delete', async (_e, id) => {
-    const result = await Customer.delete(id);
-    if (result.status) broadcastReload('customer:reload');
+ipcMain.handle('users:delete', async (_e, id) => {
+    const result = await Users.delete(id);
+    if (result.status) broadcastReload('users:reload');
     return result;
 });
 
-ipcMain.handle('product:find', async (_e, where = {}) => {
-    return await Product.find(where);
+//  tabela nutricional
+ipcMain.handle('tabela_nutricional:insert', async (_e, data) => {
+    const result = await TabelaNutricional.insert(data);
+    if (result.status) broadcastReload('tabela_nutricional:reload');
+    return result;
 });
-ipcMain.handle('product:findById', async (_e, id) => {
-    return await Product.findById(id);
+ipcMain.handle('tabela_nutricional:find', async (_e, where = {}) => {
+    return await TabelaNutricional.find(where);
+});
+ipcMain.handle('tabela_nutricional:findById', async (_e, id) => {
+    return await TabelaNutricional.findById(id);
+});
+ipcMain.handle('tabela_nutricional:update', async (_e, id, data) => {
+    const result = await TabelaNutricional.update(id, data);
+    if (result.status) broadcastReload('tabela_nutricional:reload');
+    return result;
+});
+ipcMain.handle('tabela_nutricional:delete', async (_e, id) => {
+    const result = await TabelaNutricional.delete(id);
+    if (result.status) broadcastReload('tabela_nutricional:reload');
+    return result;
 });
