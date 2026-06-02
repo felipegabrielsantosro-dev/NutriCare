@@ -1,4 +1,5 @@
 import { Datatables } from "../components/Datatables.js"
+<<<<<<< HEAD
 api.nutricional.onReload(() => {
     $('#tabela_nutricional').DataTable().ajax.reload(null, false);
 });
@@ -19,6 +20,49 @@ Datatables.SetTable('#tabela_nutricional', [
     { data: 'gorduras_trans' },
     { data: 'fibra_alimentar' },
     { data: 'sodio' },
+=======
+api.product.onReload(() => {
+    $('#tabela-nutricional').DataTable().ajax.reload(null, false);
+});
+// Inicializa a tabela
+Datatables.SetTable('#tabela-nutricional', [
+    { data: 'id' },
+    { data: 'nome' },
+    { data: 'codigo_barra' },
+    { data: 'unidade' },
+    {
+        data: 'preco_compra',
+        render: function (data) {
+            return parseFloat(data).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+    },
+    {
+        data: 'preco_venda',
+        render: function (data) {
+            return parseFloat(data).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+    },
+    {
+        data: 'ativo',
+        render: function (data) {
+            return data
+                ? `<span>Ativo <i class="fa-regular fa-square-check"></i></span>`
+                : `<span>Inativo <i class="fa-regular fa-square-full"></i></span>`;
+        }
+    },
+    {
+        data: 'criado_em',
+        render: function (data) {
+            return new Date(data).toLocaleString('pt-BR');
+        }
+    },
+    {
+        data: 'atualizado_em',
+        render: function (data) {
+            return new Date(data).toLocaleString('pt-BR');
+        }
+    },
+>>>>>>> a377bb3c57c85b0453968c3c97ac684b82119b91
     {
         data: null,
         orderable: false,
@@ -34,6 +78,7 @@ Datatables.SetTable('#tabela_nutricional', [
             `;
         }
     }
+<<<<<<< HEAD
 ]).getData(async (filter) => {
     // 🔍 MAPEAMENTO DO FILTRO: Traduz o formato do DataTables para o seu Backend
     const parametrosParaOBanco = {
@@ -119,3 +164,52 @@ async function editNutricional(id) {
 // Garante que o HTML do Datatables consiga enxergar as funções ao clicar
 window.deleteNutricional = deleteNutricional;
 window.editNutricional = editNutricional;
+=======
+]).getData(filter => api.nutricional.find(filter));
+async function deleteNutricional(id) {
+    const result = await Swal.fire({
+        title: 'Tem certeza?',
+        text: 'Esta ação não pode ser desfeita.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sim, excluir',
+        cancelButtonText: 'Cancelar',
+    });
+
+    if (result.isConfirmed) {
+        const response = await api.nutricional.delete(id);
+
+        if (response.status) {
+            toast('success', 'Excluído', response.msg);
+            $('#tabela-nutricional').DataTable().ajax.reload();
+        } else {
+            toast('error', 'Erro', response.msg);
+        }
+    }
+}
+async function editNutricional(id) {
+    try {
+        // 1. Busca os dados completos do produto
+        const product = await api.product.findById(id);
+        if (!product) {
+            toast('error', 'Erro', 'Tabela Nutricional não encontrado.');
+            return;
+        }
+        // 2. Salva no temp store com a ação 'e' (editar)
+        await api.temp.set('nutricional:edit', {
+            action: 'e',
+            ...product,
+        });
+        // 3. Abre a modal
+        api.window.openModal('pages/nutricional', {
+            width: 800,
+            height: 420,
+            title: 'Editar Produto',
+        });
+    } catch (err) {
+        toast('error', 'Falha', 'Erro: ' + err.message);
+    }
+}
+window.deleteProduct = deleteProduct;
+window.editProduct = editProduct;
+>>>>>>> a377bb3c57c85b0453968c3c97ac684b82119b91

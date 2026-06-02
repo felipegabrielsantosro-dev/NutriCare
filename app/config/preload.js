@@ -24,6 +24,7 @@ contextBridge.exposeInMainWorld('api', {
         delete(id) { return ipcRenderer.invoke('users:delete', id); },
         onReload(callback) {
             ipcRenderer.on('users:reload', () => callback());
+<<<<<<< HEAD
         },
     },
     nutricional: {
@@ -36,6 +37,8 @@ contextBridge.exposeInMainWorld('api', {
         reload(data) { return ipcRenderer.invoke('tabela_nutricional:find', data); },
         onReload(callback) {
             ipcRenderer.on('tabela_nutricional:reload', () => callback());
+=======
+>>>>>>> a377bb3c57c85b0453968c3c97ac684b82119b91
         },
     },
     product: {
@@ -45,11 +48,19 @@ contextBridge.exposeInMainWorld('api', {
             ipcRenderer.on('product:reload', () => callback());
         },
     },
+<<<<<<< HEAD
     insert(data) { return ipcRenderer.invoke('users:insert', data); },
     find(where) { return ipcRenderer.invoke('users:find', where); },
     findById(id) { return ipcRenderer.invoke('users:findById', id); },
     update(id, data) { return ipcRenderer.invoke('users:update', id, data); },
     delete(id) { return ipcRenderer.invoke('users:delete', id); },
+=======
+    insert(data) {return ipcRenderer.invoke('users:insert', data);},
+    find(where) {return ipcRenderer.invoke('users:find', where);},
+    findById(id) {return ipcRenderer.invoke('users:findById', id);},
+    update(id, data) {return ipcRenderer.invoke('users:update', id, data);},
+    delete(id) {return ipcRenderer.invoke('users:delete', id);},
+>>>>>>> a377bb3c57c85b0453968c3c97ac684b82119b91
     onReload(callback) {
         ipcRenderer.on('users:reload', () => callback());
     },

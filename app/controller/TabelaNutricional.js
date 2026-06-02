@@ -1,4 +1,5 @@
 import connection from '../database/Connection.js';
+<<<<<<< HEAD
 
 export default class TabelaNutricional {
     // Tabela no banco
@@ -30,6 +31,21 @@ export default class TabelaNutricional {
         // Total sem filtro
         const [{ count: total }] = await connection(TabelaNutricional.table).count('id as count');
         // Monta WHERE da busca
+=======
+export default class TabelaNutricional {
+    // Tabela no banco
+    static table = 'tabela-nutricional';
+    // Mapeamento: índice da coluna no DataTable → nome no banco
+    static #columns = ['id', 'nome', 'codigo_barra', 'unidade', 'preco_compra', 'preco_venda', 'ativo', 'criado_em', 'atualizado_em', null];
+    // Colunas pesquisáveis pelo termo de busca
+    static #searchable = ['nome', 'codigo_barra', 'unidade', 'preco_compra', 'preco_venda'];
+    //Implementamos a pesquisa completa para o produto
+    static async find(data = {}) {
+        const { term = '', limit = 10, offset = 0, orderType = 'asc', column = 0, draw = 1 } = data;
+        //Total sem filtro
+        const [{ count: total }] = await connection(TabelaNutricional.table).count('id as count');
+        //Monta WHERE da busca
+>>>>>>> a377bb3c57c85b0453968c3c97ac684b82119b91
         const search = term?.trim();
         function applySearch(query) {
             if (search) {
@@ -61,8 +77,12 @@ export default class TabelaNutricional {
             data: rows,
         };
     }
+<<<<<<< HEAD
 
     // Retorna apenas um produto pelo seu ID
+=======
+    //Retorna apenas um produto pelo seu ID
+>>>>>>> a377bb3c57c85b0453968c3c97ac684b82119b91
     static async findById(id) {
         if (!id) return null;
         const row = await connection(TabelaNutricional.table)
@@ -70,6 +90,7 @@ export default class TabelaNutricional {
             .first();
         return row || null;
     }
+<<<<<<< HEAD
 
     static async insert(data) {
         try {
@@ -156,4 +177,6 @@ export default class TabelaNutricional {
             };
         }
     }
+=======
+>>>>>>> a377bb3c57c85b0453968c3c97ac684b82119b91
 }
