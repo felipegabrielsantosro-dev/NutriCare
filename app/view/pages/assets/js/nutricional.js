@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 const form = document.getElementById('form');
 const Action = document.getElementById('action');
 const Id = document.getElementById('id');
@@ -69,7 +69,7 @@ document.getElementById('insert').addEventListener('click', async () => {
         );
     }
 });
-=======
+
 import { SellingPriceCalculator } from "../components/SellingPriceCalculator.js";
 
 //import { SellingPriceCalculator } from "../components/SellingPriceCalculator.js";
@@ -164,4 +164,3 @@ inputPurchasePrice.addEventListener('input', () => {
         Id.value = '';
     }
 })();
->>>>>>> a377bb3c57c85b0453968c3c97ac684b82119b91

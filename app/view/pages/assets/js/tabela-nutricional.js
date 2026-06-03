@@ -164,7 +164,7 @@ async function editNutricional(id) {
 // Garante que o HTML do Datatables consiga enxergar as funções ao clicar
 window.deleteNutricional = deleteNutricional;
 window.editNutricional = editNutricional;
-=======
+
 ]).getData(filter => api.nutricional.find(filter));
 async function deleteNutricional(id) {
     const result = await Swal.fire({
