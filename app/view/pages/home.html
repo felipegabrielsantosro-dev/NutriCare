@@ -4,6 +4,30 @@
 
 {% block styles %}
 <link rel="stylesheet" href="file:///{{ assets }}/css/home.css">
+
+<style>
+    .dashboard-title {
+        font-weight: 700;
+        margin-bottom: 20px;
+    }
+
+    .chart-card {
+        min-height: 350px;
+    }
+
+    .chart-container {
+        height: 280px;
+    }
+
+    .small-box {
+        cursor: pointer;
+        transition: .3s;
+    }
+
+    .small-box:hover {
+        transform: translateY(-4px);
+    }
+</style>
 {% endblock %}
 
 {% block menu %}
@@ -11,57 +35,142 @@
 {% endblock %}
 
 {% block content %}
-<h1>Painel Principal</h1>
 
-<div class="row p-3">
+<div class="container-fluid">
 
-    <!-- tabela nutricional -->
-    <div class="col-lg-6 col-6">
-        <div class="small-box text-bg-primary">
+    <h1 class="dashboard-title">
+        <i class="fa-solid fa-chart-line"></i>
+        Painel Principal
+    </h1>
 
-            <div class="inner"
-                 onclick="api.window.open('pages/tabela-nutricional', { title: 'Tabela Nutricional' })"
-                 style="cursor: pointer;">
-                <h3>150</h3>
-                <p>Tabela Nutricional</p>
+    <div class="row g-3">
+
+        <!-- TABELA NUTRICIONAL -->
+        <div class="col-lg-3 col-md-6">
+            <div class="small-box text-bg-primary">
+                <div class="inner"
+                     onclick="api.window.open('pages/tabela-nutricional', { title: 'Tabela Nutricional' })">
+                    <h3 id="total-tabelas">150</h3>
+                    <p>Tabelas Nutricionais</p>
+                </div>
+
+                <div class="icon">
+                    <i class="fa-solid fa-clipboard-list"></i>
+                </div>
+
+                <a href="#"
+                   onclick="event.preventDefault(); api.window.open('pages/tabela-nutricional', { title: 'Tabela Nutricional' })"
+                   class="small-box-footer">
+                    Ver detalhes <i class="bi bi-arrow-right"></i>
+                </a>
             </div>
-
-            <i class="fa-solid fa-barcode fa-2xl"
-               onclick="api.window.open('pages/list-product', { title: 'Tabela Nutricional' })"
-               style="cursor: pointer;"></i>
-
-            <a href="#"
-               onclick="event.preventDefault(); api.window.open('pages/tabela-nutricional', { title: 'Tabela Nutricional' })"
-               class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
-                Mais informações <i class="bi bi-link-45deg"></i>
-            </a>
-
         </div>
+
+        <!-- USUÁRIOS -->
+        <div class="col-lg-3 col-md-6">
+            <div class="small-box text-bg-warning">
+                <div class="inner"
+                     onclick="api.window.open('pages/list-users', { title: 'Usuários' })">
+                    <h3 id="total-usuarios">44</h3>
+                    <p>Usuários</p>
+                </div>
+
+                <div class="icon">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+
+                <a href="#"
+                   onclick="event.preventDefault(); api.window.open('pages/list-users', { title: 'Usuários' })"
+                   class="small-box-footer">
+                    Ver detalhes <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- PRODUTOS -->
+        <div class="col-lg-3 col-md-6">
+            <div class="small-box text-bg-success">
+                <div class="inner"
+                     onclick="api.window.open('pages/list-product', { title: 'Produtos' })">
+                    <h3 id="total-produtos">0</h3>
+                    <p>Produtos</p>
+                </div>
+
+                <div class="icon">
+                    <i class="fa-solid fa-box"></i>
+                </div>
+
+                <a href="#"
+                   onclick="event.preventDefault(); api.window.open('pages/list-product', { title: 'Produtos' })"
+                   class="small-box-footer">
+                    Ver detalhes <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- RELATÓRIOS -->
+        <div class="col-lg-3 col-md-6">
+            <div class="small-box text-bg-danger">
+                <div class="inner">
+                    <h3>100%</h3>
+                    <p>Relatórios</p>
+                </div>
+
+                <div class="icon">
+                    <i class="fa-solid fa-chart-pie"></i>
+                </div>
+
+                <a href="#" class="small-box-footer">
+                    Ver detalhes <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+
     </div>
 
-    <!-- USUÁRIOS -->
-    <div class="col-lg-6 col-6">
-        <div class="small-box text-bg-warning">
+    <!-- GRÁFICOS -->
+    <div class="row mt-4">
 
-            <div class="inner"
-                 onclick="api.window.open('pages/list-users', { title: 'Usuários' })"
-                 style="cursor: pointer;">
-                <h3>44</h3>
-                <p>Usuários</p>
+        <div class="col-lg-6">
+            <div class="card chart-card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fa-solid fa-chart-column"></i>
+                        Produtos Cadastrados
+                    </h5>
+                </div>
+
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="graficoProdutos"></canvas>
+                    </div>
+                </div>
             </div>
-
-            <i class="fa-solid fa-users fa-2xl"
-               onclick="api.window.open('pages/list-users', { title: 'Usuários' })"
-               style="cursor: pointer;"></i>
-
-            <a href="#"
-               onclick="event.preventDefault(); api.window.open('pages/list-users', { title: 'Usuários' })"
-               class="small-box-footer link-dark link-underline-opacity-0 link-underline-opacity-50-hover">
-                Mais informações <i class="bi bi-link-45deg"></i>
-            </a>
-
         </div>
+
+        <div class="col-lg-6">
+            <div class="card chart-card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fa-solid fa-chart-line"></i>
+                        Crescimento do Sistema
+                    </h5>
+                </div>
+
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="graficoUsuarios"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
 </div>
+
+{% endblock %}
+
+{% block scripts %}
+<script defer type="module" src="file:///{{ assets }}/js/home.js"></script>
 {% endblock %}

@@ -1,96 +1,143 @@
 import connection from '../database/Connection.js';
-<<<<<<< HEAD
 
 export default class TabelaNutricional {
-    // Tabela no banco
-    static table = 'tabela_nutricional';
-    // Mapeamento: índice da coluna no DataTable → nome no banco
-    static #columns = ['id', 'usuario_id', 'produto', 'porcao', 'porcoes_embalagem', 'valor_energetico', 'carboidratos', 'acucares_totais', 'acucares_adicionados', 'proteinas', 'gorduras_totais', 'gorduras_saturadas', 'gorduras_trans', 'fibra_alimentar', 'sodio', 'preco_compra', 'preco_venda', 'ativo', 'criado_em', 'atualizado_em', null];
-    // Colunas pesquisáveis pelo termo de busca
-    static #searchable = ['usuario_id', 'produto', 'porcao', 'porcoes_embalagem', 'valor_energetico', 'carboidratos', 'acucares_totais', 'acucares_adicionados', 'proteinas', 'gorduras_totais', 'gorduras_saturadas', 'gorduras_trans', 'fibra_alimentar', 'sodio', 'preco_compra', 'preco_venda'];
 
-    // Auxiliar para limpar strings vazias de campos numéricos
+    static table = 'tabela_nutricional';
+
+    static #columns = [
+        'id',
+        'usuario_id',
+        'produto',
+        'porcao',
+        'porcoes_embalagem',
+        'valor_energetico',
+        'carboidratos',
+        'acucares_totais',
+        'acucares_adicionados',
+        'proteinas',
+        'gorduras_totais',
+        'gorduras_saturadas',
+        'gorduras_trans',
+        'fibra_alimentar',
+        'sodio',
+        'criado_em',
+        'atualizado_em',
+        null
+    ];
+
+    static #searchable = [
+        'usuario_id',
+        'produto',
+        'porcao',
+        'porcoes_embalagem',
+        'valor_energetico',
+        'carboidratos',
+        'acucares_totais',
+        'acucares_adicionados',
+        'proteinas',
+        'gorduras_totais',
+        'gorduras_saturadas',
+        'gorduras_trans',
+        'fibra_alimentar',
+        'sodio'
+    ];
+
     static #tratarCamposNumericos(objeto) {
         const camposNumericos = [
-            'porcao', 'porcoes_embalagem', 'valor_energetico', 'carboidratos',
-            'acucares_totais', 'acucares_adicionados', 'proteinas', 'gorduras_totais',
-            'gorduras_saturadas', 'gorduras_trans', 'fibra_alimentar', 'sodio'
+            'porcao',
+            'porcoes_embalagem',
+            'valor_energetico',
+            'carboidratos',
+            'acucares_totais',
+            'acucares_adicionados',
+            'proteinas',
+            'gorduras_totais',
+            'gorduras_saturadas',
+            'gorduras_trans',
+            'fibra_alimentar',
+            'sodio'
         ];
 
         for (const campo of camposNumericos) {
-            if (objeto[campo] === "") {
-                objeto[campo] = 0; // Altere para null se o seu banco aceitar valores nulos
+            if (objeto[campo] === '') {
+                objeto[campo] = 0;
             }
         }
+
         return objeto;
     }
 
-    // Implementamos a pesquisa completa para o produto
     static async find(data = {}) {
-        const { term = '', limit = 10, offset = 0, orderType = 'asc', column = 0, draw = 1 } = data;
-        // Total sem filtro
-        const [{ count: total }] = await connection(TabelaNutricional.table).count('id as count');
-        // Monta WHERE da busca
-=======
-export default class TabelaNutricional {
-    // Tabela no banco
-    static table = 'tabela-nutricional';
-    // Mapeamento: índice da coluna no DataTable → nome no banco
-    static #columns = ['id', 'nome', 'codigo_barra', 'unidade', 'preco_compra', 'preco_venda', 'ativo', 'criado_em', 'atualizado_em', null];
-    // Colunas pesquisáveis pelo termo de busca
-    static #searchable = ['nome', 'codigo_barra', 'unidade', 'preco_compra', 'preco_venda'];
-    //Implementamos a pesquisa completa para o produto
-    static async find(data = {}) {
-        const { term = '', limit = 10, offset = 0, orderType = 'asc', column = 0, draw = 1 } = data;
-        //Total sem filtro
-        const [{ count: total }] = await connection(TabelaNutricional.table).count('id as count');
-        //Monta WHERE da busca
->>>>>>> a377bb3c57c85b0453968c3c97ac684b82119b91
+        const {
+            term = '',
+            limit = 10,
+            offset = 0,
+            orderType = 'asc',
+            column = 0,
+            draw = 1
+        } = data;
+
+        const [{ count: total }] = await connection(TabelaNutricional.table)
+            .count('id as count');
+
         const search = term?.trim();
+
         function applySearch(query) {
             if (search) {
                 query.where(function () {
                     for (const col of TabelaNutricional.#searchable) {
-                        this.orWhereRaw(`CAST("${col}" AS TEXT) ILIKE ?`, [`%${search}%`]);
+                        this.orWhereRaw(
+                            `CAST("${col}" AS TEXT) ILIKE ?`,
+                            [`%${search}%`]
+                        );
                     }
                 });
             }
+
             return query;
         }
-        // Total filtrado
-        const filteredQ = connection(TabelaNutricional.table).count('id as count');
+
+        const filteredQ = connection(TabelaNutricional.table)
+            .count('id as count');
+
         applySearch(filteredQ);
+
         const [{ count: filtered }] = await filteredQ;
-        // Dados paginados
-        const orderColumn = TabelaNutricional.#columns[column] || 'id';
-        const orderDir = orderType === 'desc' ? 'desc' : 'asc';
-        const dataQ = connection(TabelaNutricional.table).select('*');
+
+        const orderColumn =
+            TabelaNutricional.#columns[column] || 'id';
+
+        const orderDir =
+            orderType === 'desc' ? 'desc' : 'asc';
+
+        const dataQ = connection(TabelaNutricional.table)
+            .select('*');
+
         applySearch(dataQ);
+
         dataQ.orderBy(orderColumn, orderDir);
-        dataQ.limit(parseInt(limit));
-        dataQ.offset(parseInt(offset));
+        dataQ.limit(Number(limit));
+        dataQ.offset(Number(offset));
+
         const rows = await dataQ;
+
         return {
-            draw: parseInt(draw),
-            recordsTotal: parseInt(total),
-            recordsFiltered: parseInt(filtered),
-            data: rows,
+            draw: Number(draw),
+            recordsTotal: Number(total),
+            recordsFiltered: Number(filtered),
+            data: rows
         };
     }
-<<<<<<< HEAD
 
-    // Retorna apenas um produto pelo seu ID
-=======
-    //Retorna apenas um produto pelo seu ID
->>>>>>> a377bb3c57c85b0453968c3c97ac684b82119b91
     static async findById(id) {
         if (!id) return null;
+
         const row = await connection(TabelaNutricional.table)
             .where({ id })
             .first();
+
         return row || null;
     }
-<<<<<<< HEAD
 
     static async insert(data) {
         try {
@@ -116,10 +163,10 @@ export default class TabelaNutricional {
                 ativo: true
             };
 
-            // Remove strings vazias dos campos numéricos antes de salvar
             data = TabelaNutricional.#tratarCamposNumericos(data);
 
-            await connection(TabelaNutricional.table).insert(data);
+            await connection(TabelaNutricional.table)
+                .insert(data);
 
             return {
                 status: true,
@@ -141,7 +188,6 @@ export default class TabelaNutricional {
             data.usuario_id = data.usuario;
             delete data.usuario;
 
-            // Remove strings vazias dos campos numéricos antes de atualizar
             data = TabelaNutricional.#tratarCamposNumericos(data);
 
             await connection(TabelaNutricional.table)
@@ -177,6 +223,4 @@ export default class TabelaNutricional {
             };
         }
     }
-=======
->>>>>>> a377bb3c57c85b0453968c3c97ac684b82119b91
 }

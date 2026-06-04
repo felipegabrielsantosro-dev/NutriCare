@@ -78,7 +78,6 @@ ipcMain.handle('users:delete', async (_e, id) => {
 });
 
 //  tabela nutricional
-<<<<<<< HEAD
 ipcMain.handle('tabela_nutricional:insert', async (_e, data) => {
     const result = await TabelaNutricional.insert(data);
     if (result.status) broadcastReload('tabela_nutricional:reload');
@@ -98,7 +97,7 @@ ipcMain.handle('tabela_nutricional:update', async (_e, id, data) => {
 ipcMain.handle('tabela_nutricional:delete', async (_e, id) => {
     const result = await TabelaNutricional.delete(id);
     if (result.status) broadcastReload('tabela_nutricional:reload');
-=======
+});
 ipcMain.handle('tabela-nutricional:insert', async (_e, data) => {
     const result = await TabelaNutricional.insert(data);
     if (result.status) broadcastReload('tabela-nutricional:reload');
@@ -118,6 +117,5 @@ ipcMain.handle('tabela-nutricional:update', async (_e, id, data) => {
 ipcMain.handle('tabela-nutricional:delete', async (_e, id) => {
     const result = await TabelaNutricional.delete(id);
     if (result.status) broadcastReload('tabela-nutricional:reload');
->>>>>>> a377bb3c57c85b0453968c3c97ac684b82119b91
     return result;
 });

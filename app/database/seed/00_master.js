@@ -29,10 +29,7 @@ exports.seed = async function (knex) {
       sexo: 'M',
       altura: 1.75,
       peso: 70,
-<<<<<<< HEAD
       objetivo: 'Hipertrofia'
-=======
->>>>>>> a377bb3c57c85b0453968c3c97ac684b82119b91
     },
     {
       id: 2,
@@ -43,10 +40,8 @@ exports.seed = async function (knex) {
       sexo: 'M',
       altura: 1.80,
       peso: 80,
-<<<<<<< HEAD
+
       objetivo: 'Definição'
-=======
->>>>>>> a377bb3c57c85b0453968c3c97ac684b82119b91
     }
   ]);
 
