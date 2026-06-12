@@ -39,6 +39,10 @@ contextBridge.exposeInMainWorld('api', {
         },
     },
     product: {
+        list: () => ipcRenderer.invoke('product:list'),
+        insert: (data) => ipcRenderer.invoke('product:insert', data),
+        update: (id, data) => ipcRenderer.invoke('product:update', id, data),
+        delete: (id) => ipcRenderer.invoke('product:delete', id),
         find(where) { return ipcRenderer.invoke('product:find', where); },
         findById(id) { return ipcRenderer.invoke('product:findById', id); },
         onReload(callback) {
@@ -50,11 +54,11 @@ contextBridge.exposeInMainWorld('api', {
     findById(id) { return ipcRenderer.invoke('users:findById', id); },
     update(id, data) { return ipcRenderer.invoke('users:update', id, data); },
     delete(id) { return ipcRenderer.invoke('users:delete', id); },
-    insert(data) {return ipcRenderer.invoke('users:insert', data);},
-    find(where) {return ipcRenderer.invoke('users:find', where);},
-    findById(id) {return ipcRenderer.invoke('users:findById', id);},
-    update(id, data) {return ipcRenderer.invoke('users:update', id, data);},
-    delete(id) {return ipcRenderer.invoke('users:delete', id);},
+    insert(data) { return ipcRenderer.invoke('users:insert', data); },
+    find(where) { return ipcRenderer.invoke('users:find', where); },
+    findById(id) { return ipcRenderer.invoke('users:findById', id); },
+    update(id, data) { return ipcRenderer.invoke('users:update', id, data); },
+    delete(id) { return ipcRenderer.invoke('users:delete', id); },
     onReload(callback) {
         ipcRenderer.on('users:reload', () => callback());
     },

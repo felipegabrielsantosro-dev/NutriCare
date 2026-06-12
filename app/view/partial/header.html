@@ -8,13 +8,8 @@
         </a>
 
         <!-- Menu Mobile -->
-        <button class="navbar-toggler"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#navbarNavDropdown"
-                aria-controls="navbarNavDropdown"
-                aria-expanded="false"
-                aria-label="Alternar navegação">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown"
+            aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Alternar navegação">
             <span class="navbar-toggler-icon"></span>
         </button>
 
@@ -24,9 +19,7 @@
             <ul class="navbar-nav me-auto">
 
                 <li class="nav-item">
-                    <a class="nav-link"
-                       href="#"
-                       onclick="api.window.open('pages/home', { title: 'Painel Principal' })">
+                    <a class="nav-link" href="#" onclick="api.window.open('pages/home', { title: 'Painel Principal' })">
                         <i class="fa-solid fa-house"></i>
                         Dashboard
                     </a>
@@ -34,10 +27,7 @@
 
                 <li class="nav-item dropdown">
 
-                    <a class="nav-link dropdown-toggle"
-                       href="#"
-                       role="button"
-                       data-bs-toggle="dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                         <i class="fa-solid fa-folder-plus"></i>
                         Cadastros
                     </a>
@@ -46,8 +36,8 @@
 
                         <li>
                             <span class="dropdown-item"
-                                  onclick="api.window.open('pages/list-users', { title: 'Usuários' })"
-                                  style="cursor:pointer;">
+                                onclick="api.window.open('pages/list-users', { title: 'Usuários' })"
+                                style="cursor:pointer;">
                                 <i class="fa-solid fa-users text-primary"></i>
                                 Usuários
                             </span>
@@ -55,8 +45,8 @@
 
                         <li>
                             <span class="dropdown-item"
-                                  onclick="api.window.open('pages/tabela-nutricional', { title: 'Tabela Nutricional' })"
-                                  style="cursor:pointer;">
+                                onclick="api.window.open('pages/tabela-nutricional', { title: 'Tabela Nutricional' })"
+                                style="cursor:pointer;">
                                 <i class="fa-solid fa-table text-success"></i>
                                 Tabelas Nutricionais
                             </span>
@@ -68,10 +58,7 @@
 
                 <li class="nav-item dropdown">
 
-                    <a class="nav-link dropdown-toggle"
-                       href="#"
-                       role="button"
-                       data-bs-toggle="dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                         <i class="fa-solid fa-chart-column"></i>
                         Relatórios
                     </a>
@@ -79,10 +66,10 @@
                     <ul class="dropdown-menu">
 
                         <li>
-                            <span class="dropdown-item" style="cursor:pointer;">
-                                <i class="fa-solid fa-chart-pie"></i>
-                                Relatório Nutricional
-                            </span>
+                                <span class="dropdown-item" onclick="api.window.open('pages/relatorio-nutricional', { title: 'Tabela Nutricional' })"  style="cursor:pointer;">
+                                    <i class="fa-solid fa-chart-pie"></i>
+                                    Relatório Nutricional
+                                </span>
                         </li>
 
                         <li>
@@ -104,10 +91,8 @@
 
                 <li class="nav-item dropdown">
 
-                    <a class="nav-link dropdown-toggle d-flex align-items-center gap-2"
-                       href="#"
-                       role="button"
-                       data-bs-toggle="dropdown">
+                    <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" role="button"
+                        data-bs-toggle="dropdown">
 
                         <i class="fa-solid fa-circle-user fs-5"></i>
                         <span>Administrador</span>
@@ -130,7 +115,9 @@
                             </span>
                         </li>
 
-                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
 
                         <li>
                             <span class="dropdown-item text-danger">

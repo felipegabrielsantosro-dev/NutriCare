@@ -19,13 +19,6 @@
 
         <div class="col-8">
             <div class="form-floating mb-3">
-                <input type="text" class="form-control" id="user" name="user">
-                <label>Usuário</label>
-            </div>
-        </div>
-
-        <div class="col-8">
-            <div class="form-floating mb-3">
                 <input type="text" class="form-control" id="alimentos" name="alimentos">
                 <label>Alimentos</label>
             </div>
@@ -153,5 +146,7 @@
     </div>
 
 </form>
-
+{% endblock %}
+{% block scripts %}
+<script defer type="module" src="file:///{{ assets }}/js/product.js"></script>
 {% endblock %}
