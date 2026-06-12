@@ -35,29 +35,34 @@ if (altura) altura.addEventListener('input', calcIMC);
 if (peso) peso.addEventListener('input', calcIMC);
 
 // 🔄 CARREGA DADOS DE EDIÇÃO
+// Dentro do seu users.js (Script do formulário de cadastro/edição)
 (async () => {
-    const editData = await api.temp.get('users:edit');
+    try {
+        // Busca os dados enviados pela listagem
+        const editData = await api.temp.get('user:edit');
+        const form = document.getElementById('form'); // Garanta que o id do form seja este
 
-    if (editData) {
-        Action.value = editData.action || 'e';
-        Id.value = editData.id || '';
+        if (editData) {
+            document.getElementById('action').value = editData.action || 'e';
+            document.getElementById('id').value = editData.id || '';
 
-        for (const [key, value] of Object.entries(editData)) {
-            const field = form.querySelector(`[name="${key}"]`);
-
-            if (!field) continue;
-
-            if (field.type === 'checkbox') {
-                field.checked = value === true || value === 'true';
-            } else {
-                field.value = value || '';
+            // Preenche os inputs automaticamente
+            for (const [key, value] of Object.entries(editData)) {
+                const field = form.querySelector(`[name="${key}"]`);
+                if (field) {
+                    if (field.type === 'checkbox' || field.type === 'radio') {
+                        field.checked = value === true || value === 1;
+                    } else {
+                        field.value = value ?? '';
+                    }
+                }
             }
+        } else {
+            document.getElementById('action').value = 'c';
+            document.getElementById('id').value = '';
         }
-
-        calcIMC();
-    } else {
-        Action.value = 'c';
-        Id.value = '';
+    } catch (error) {
+        console.error("Erro ao inicializar formulário de usuário:", error);
     }
 })();
 
