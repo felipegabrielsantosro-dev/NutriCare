@@ -1,0 +1,157 @@
+{% extends "layouts/main.html" %}
+
+{% block title %}Cadastro de Produto{% endblock %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-12">
+        <h2>Cadastro de Produto</h2>
+    </div>
+</div>
+
+<form id="form">
+
+    <input type="hidden" id="id" name="id">
+    <input type="hidden" id="action" name="action">
+
+    <div class="row">
+
+        <div class="col-8">
+            <div class="form-floating mb-3">
+                <input type="text" class="form-control" id="user" name="user">
+                <label>Usuário</label>
+            </div>
+        </div>
+
+        <div class="col-8">
+            <div class="form-floating mb-3">
+                <input type="text" class="form-control" id="alimentos" name="alimentos">
+                <label>Alimentos</label>
+            </div>
+        </div>
+
+        <div class="col-8">
+            <div class="form-floating mb-3">
+                <input type="text" class="form-control" id="refeicoes" name="refeicoes">
+                <label>Refeições</label>
+            </div>
+        </div>
+
+        <div class="col-8">
+            <div class="form-floating mb-3">
+                <input type="text" class="form-control" id="refeicao_itens" name="refeicao_itens">
+                <label>Refeição Itens</label>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="row">
+
+        <div class="col-4">
+            <div class="form-floating mb-3">
+                <input type="text" class="form-control" id="preco_compra" name="preco_compra">
+                <label>Preço de Compra</label>
+            </div>
+        </div>
+
+        <div class="col-4">
+            <div class="form-floating mb-3">
+                <input type="text" class="form-control" id="total_imposto" name="total_imposto">
+                <label>Total de Imposto</label>
+            </div>
+        </div>
+
+        <div class="col-4">
+            <div class="form-floating mb-3">
+                <input type="text" class="form-control" id="margem_lucro" name="margem_lucro">
+                <label>Margem de Lucro</label>
+            </div>
+        </div>
+
+        <div class="col-4">
+            <div class="form-floating mb-3">
+                <input type="text" class="form-control" id="custo_operacional" name="custo_operacional">
+                <label>Custo Operacional</label>
+            </div>
+        </div>
+
+        <div class="col-4">
+            <div class="form-floating mb-3">
+                <input type="text" class="form-control" id="preco_venda" name="preco_venda">
+                <label>Preço de Venda</label>
+            </div>
+        </div>
+
+        <div class="col-2">
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="ativo" name="ativo" checked>
+                <label class="form-check-label">
+                    Produto ativo?
+                </label>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+
+            <div class="resultado-row mb-2 d-none" id="resultado-row">
+
+                <div class="metrica-col">
+                    <span class="metrica-label">Total de imposto</span>
+                    <span class="metrica-valor" id="val-imposto">—</span>
+                </div>
+
+                <div class="metrica-col">
+                    <span class="metrica-label">Custo operacional</span>
+                    <span class="metrica-valor" id="val-custo">—</span>
+                </div>
+
+                <div class="metrica-col">
+                    <span class="metrica-label">Margem de lucro</span>
+                    <span class="metrica-valor" id="val-margem">—</span>
+                </div>
+
+                <div class="metrica-col destaque">
+                    <span class="metrica-label">Preço de venda sugerido</span>
+                    <span class="metrica-valor" id="val-venda">—</span>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <div class="row">
+
+        <div class="col-12">
+            <div class="form-floating">
+                <textarea
+                    class="form-control"
+                    id="descricao"
+                    name="descricao"
+                    style="height:100px"></textarea>
+
+                <label>Descrição</label>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="row mt-2">
+
+        <div class="col-12 mt-2">
+            <button type="button" class="btn btn-outline-success" id="insert">
+                <i class="fa-solid fa-floppy-disk"></i>
+                Salvar
+            </button>
+        </div>
+
+    </div>
+
+</form>
+
+{% endblock %}

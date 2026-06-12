@@ -7,25 +7,83 @@
 
 <style>
     .dashboard-title {
+        font-size: 2rem;
         font-weight: 700;
-        margin-bottom: 20px;
+        margin-bottom: 1.5rem;
     }
 
-    .chart-card {
-        min-height: 350px;
+    .stats-card {
+        border: none;
+        border-radius: 16px;
+        overflow: hidden;
+        cursor: pointer;
+        transition: all .3s ease;
+        box-shadow: 0 .125rem .25rem rgba(0, 0, 0, .075);
+    }
+
+    .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 .75rem 1.5rem rgba(0, 0, 0, .15);
+    }
+
+    .stats-card .card-body {
+        padding: 1.4rem;
+    }
+
+    .stats-number {
+        font-size: 2rem;
+        font-weight: 700;
+        line-height: 1;
+        margin-bottom: .3rem;
+    }
+
+    .stats-label {
+        margin: 0;
+        font-size: .95rem;
+        opacity: .9;
+    }
+
+    .stats-icon {
+        font-size: 2.5rem;
+        opacity: .25;
+    }
+
+    .quick-stats .card {
+        margin-bottom: 1rem;
+    }
+
+    .chart-card,
+    .welcome-card {
+        border: none;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 .125rem .25rem rgba(0,0,0,.075);
+    }
+
+    .chart-card .card-header {
+        font-weight: 600;
+        padding: 1rem 1.25rem;
+        background: #fff;
     }
 
     .chart-container {
-        height: 280px;
+        height: 320px;
+        position: relative;
     }
 
-    .small-box {
-        cursor: pointer;
-        transition: .3s;
+    .welcome-card .card-body {
+        padding: 1.5rem;
     }
 
-    .small-box:hover {
-        transform: translateY(-4px);
+    @media (max-width: 992px) {
+
+        .chart-container {
+            height: 260px;
+        }
+
+        .stats-number {
+            font-size: 1.6rem;
+        }
     }
 </style>
 {% endblock %}
@@ -38,131 +96,168 @@
 
 <div class="container-fluid">
 
-    <h1 class="dashboard-title">
-        <i class="fa-solid fa-chart-line"></i>
-        Painel Principal
-    </h1>
-
-    <div class="row g-3">
-
-        <!-- TABELA NUTRICIONAL -->
-        <div class="col-lg-3 col-md-6">
-            <div class="small-box text-bg-primary">
-                <div class="inner"
-                     onclick="api.window.open('pages/tabela-nutricional', { title: 'Tabela Nutricional' })">
-                    <h3 id="total-tabelas">150</h3>
-                    <p>Tabelas Nutricionais</p>
-                </div>
-
-                <div class="icon">
-                    <i class="fa-solid fa-clipboard-list"></i>
-                </div>
-
-                <a href="#"
-                   onclick="event.preventDefault(); api.window.open('pages/tabela-nutricional', { title: 'Tabela Nutricional' })"
-                   class="small-box-footer">
-                    Ver detalhes <i class="bi bi-arrow-right"></i>
-                </a>
-            </div>
-        </div>
-
-        <!-- USUÁRIOS -->
-        <div class="col-lg-3 col-md-6">
-            <div class="small-box text-bg-warning">
-                <div class="inner"
-                     onclick="api.window.open('pages/list-users', { title: 'Usuários' })">
-                    <h3 id="total-usuarios">44</h3>
-                    <p>Usuários</p>
-                </div>
-
-                <div class="icon">
-                    <i class="fa-solid fa-users"></i>
-                </div>
-
-                <a href="#"
-                   onclick="event.preventDefault(); api.window.open('pages/list-users', { title: 'Usuários' })"
-                   class="small-box-footer">
-                    Ver detalhes <i class="bi bi-arrow-right"></i>
-                </a>
-            </div>
-        </div>
-
-        <!-- PRODUTOS -->
-        <div class="col-lg-3 col-md-6">
-            <div class="small-box text-bg-success">
-                <div class="inner"
-                     onclick="api.window.open('pages/list-product', { title: 'Produtos' })">
-                    <h3 id="total-produtos">0</h3>
-                    <p>Produtos</p>
-                </div>
-
-                <div class="icon">
-                    <i class="fa-solid fa-box"></i>
-                </div>
-
-                <a href="#"
-                   onclick="event.preventDefault(); api.window.open('pages/list-product', { title: 'Produtos' })"
-                   class="small-box-footer">
-                    Ver detalhes <i class="bi bi-arrow-right"></i>
-                </a>
-            </div>
-        </div>
-
-        <!-- RELATÓRIOS -->
-        <div class="col-lg-3 col-md-6">
-            <div class="small-box text-bg-danger">
-                <div class="inner">
-                    <h3>100%</h3>
-                    <p>Relatórios</p>
-                </div>
-
-                <div class="icon">
-                    <i class="fa-solid fa-chart-pie"></i>
-                </div>
-
-                <a href="#" class="small-box-footer">
-                    Ver detalhes <i class="bi bi-arrow-right"></i>
-                </a>
-            </div>
-        </div>
-
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="dashboard-title mb-0">
+            <i class="fa-solid fa-chart-line me-2"></i>
+            Painel Principal
+        </h1>
     </div>
 
-    <!-- GRÁFICOS -->
-    <div class="row mt-4">
+    <div class="row g-4">
 
-        <div class="col-lg-6">
-            <div class="card chart-card shadow-sm">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fa-solid fa-chart-column"></i>
-                        Produtos Cadastrados
-                    </h5>
-                </div>
+        <!-- SIDEBAR -->
+        <div class="col-xl-3 col-lg-4">
 
-                <div class="card-body">
-                    <div class="chart-container">
-                        <canvas id="graficoProdutos"></canvas>
+            <div class="quick-stats">
+
+                <!-- TABELAS -->
+                <div class="card stats-card bg-primary text-white"
+                    onclick="api.window.open('pages/tabela-nutricional', { title: 'Tabela Nutricional' })">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div id="total-tabelas" class="stats-number">150</div>
+                                <p class="stats-label">Tabelas Nutricionais</p>
+                            </div>
+
+                            <i class="fa-solid fa-clipboard-list stats-icon"></i>
+                        </div>
                     </div>
                 </div>
+
+                <!-- USUÁRIOS -->
+                <div class="card stats-card bg-warning text-dark"
+                    onclick="api.window.open('pages/list-users', { title: 'Usuários' })">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div id="total-usuarios" class="stats-number">44</div>
+                                <p class="stats-label">Usuários</p>
+                            </div>
+
+                            <i class="fa-solid fa-users stats-icon"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PRODUTOS -->
+                <div class="card stats-card bg-success text-white"
+                    onclick="api.window.open('pages/list-product', { title: 'Produtos' })">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div id="total-produtos" class="stats-number">57</div>
+                                <p class="stats-label">Produtos</p>
+                            </div>
+
+                            <i class="fa-solid fa-box stats-icon"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RELATÓRIOS -->
+                <div class="card stats-card bg-danger text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="stats-number">100%</div>
+                                <p class="stats-label">Relatórios</p>
+                            </div>
+
+                            <i class="fa-solid fa-chart-pie stats-icon"></i>
+                        </div>
+                    </div>
+                </div>
+
             </div>
+
         </div>
 
-        <div class="col-lg-6">
-            <div class="card chart-card shadow-sm">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fa-solid fa-chart-line"></i>
-                        Crescimento do Sistema
-                    </h5>
-                </div>
+        <!-- CONTEÚDO -->
+        <div class="col-xl-9 col-lg-8">
 
+            <!-- BOAS VINDAS -->
+            <div class="card welcome-card mb-4">
                 <div class="card-body">
-                    <div class="chart-container">
-                        <canvas id="graficoUsuarios"></canvas>
-                    </div>
+                    <h4 class="mb-1">
+                        Bem-vindo ao DESKIVO 👋
+                    </h4>
+
+                    <p class="text-muted mb-0">
+                        Gerencie tabelas nutricionais, usuários e produtos em um único painel.
+                    </p>
                 </div>
             </div>
+
+            <!-- GRÁFICOS -->
+            <div class="row g-4">
+
+                <!-- PRODUTOS -->
+                <div class="col-md-6">
+                    <div class="card chart-card h-100">
+                        <div class="card-header">
+                            <i class="fa-solid fa-chart-column me-2"></i>
+                            Produtos Cadastrados
+                        </div>
+
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="graficoProdutos"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CRESCIMENTO -->
+                <div class="col-md-6">
+                    <div class="card chart-card h-100">
+                        <div class="card-header">
+                            <i class="fa-solid fa-chart-line me-2"></i>
+                            Crescimento do Sistema
+                        </div>
+
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="graficoUsuarios"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- USUÁRIOS -->
+                <div class="col-md-6">
+                    <div class="card chart-card h-100">
+                        <div class="card-header">
+                            <i class="fa-solid fa-users me-2"></i>
+                            Usuários por Perfil
+                        </div>
+
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="graficoUsuariosMes"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DISTRIBUIÇÃO -->
+                <div class="col-md-6">
+                    <div class="card chart-card h-100">
+                        <div class="card-header">
+                            <i class="fa-solid fa-chart-pie me-2"></i>
+                            Distribuição do Sistema
+                        </div>
+
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="graficoPizza"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
         </div>
 
     </div>
@@ -172,5 +267,90 @@
 {% endblock %}
 
 {% block scripts %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+document.addEventListener('DOMContentLoaded', () => {
+
+    // PRODUTOS
+    new Chart(document.getElementById('graficoProdutos'), {
+        type: 'bar',
+        data: {
+            labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+            datasets: [{
+                label: 'Produtos',
+                data: [12, 18, 25, 32, 41, 57],
+                borderRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+
+    // CRESCIMENTO
+    new Chart(document.getElementById('graficoUsuarios'), {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+            datasets: [{
+                label: 'Usuários',
+                data: [5, 12, 18, 28, 35, 44],
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+
+    // PERFIS
+    new Chart(document.getElementById('graficoUsuariosMes'), {
+        type: 'doughnut',
+        data: {
+            labels: [
+                'Administradores',
+                'Nutricionistas',
+                'Clientes'
+            ],
+            datasets: [{
+                data: [12, 20, 68]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+
+    // DISTRIBUIÇÃO
+    new Chart(document.getElementById('graficoPizza'), {
+        type: 'pie',
+        data: {
+            labels: [
+                'Produtos',
+                'Usuários',
+                'Tabelas'
+            ],
+            datasets: [{
+                data: [57, 44, 150]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+
+});
+
+</script>
+
 <script defer type="module" src="file:///{{ assets }}/js/home.js"></script>
+
 {% endblock %}

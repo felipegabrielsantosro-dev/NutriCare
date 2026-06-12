@@ -16,6 +16,8 @@ exports.up = function (knex) {
 
     table.decimal('peso', 5, 2).notNullable();
 
+    table.string('objetivo').nullable();
+    
     table.timestamp('data_criacao')
       .defaultTo(knex.fn.now());
   });
