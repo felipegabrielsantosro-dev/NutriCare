@@ -1,50 +1,66 @@
-const { ipcMain } = require('electron');
-const knex = require('../../../../database/Connection');
+// Carrega os dados do temp quando for edição
+window.addEventListener('DOMContentLoaded', async () => {
+    const temp = await api.temp.get('product:edit');
 
-// REGISTRA O HANDLER DO INSERT DE PRODUTOS
-ipcMain.handle('product:insert', async (event, data) => {
-    try {
-        // 1. Limpa propriedades auxiliares que vieram do formulário mas não existem na tabela do banco
-        delete data.action;
-        if (data.id === '' || data.id === undefined) {
-            delete data.id;
-        }
+    if (temp && temp.action === 'e') {
+        // Preenche os campos ocultos
+        document.getElementById('id').value = temp.id ?? '';
+        document.getElementById('action').value = 'e';
 
-        // 2. Tratamento de Máscaras (Opcional)
-        // Se os valores de preço vierem com "R$ " ou "%", limpe-os aqui antes de salvar no banco:
-        const limparNumero = (val) => {
-            if (!val) return 0;
-            return parseFloat(String(val).replace('R$', '').replace('%', '').replace(/\./g, '').replace(',', '.').trim()) || 0;
-        };
+        // Preenche os campos de texto
+        document.getElementById('alimentos').value = temp.alimentos ?? '';
+        document.getElementById('refeicoes').value = temp.refeicoes ?? '';
+        document.getElementById('refeicao_itens').value = temp.refeicao_itens ?? '';
+        document.getElementById('descricao').value = temp.descricao ?? '';
 
-        const dadosParaSalvar = {
-            alimentos: data.alimentos,
-            refeicoes: data.refeicoes,
-            refeicao_itens: data.refeicao_itens,
-            preco_compra: limparNumero(data.preco_compra),
-            total_imposto: limparNumero(data.total_imposto),
-            margem_lucro: limparNumero(data.margem_lucro),
-            custo_operacional: limparNumero(data.custo_operacional),
-            preco_venda: limparNumero(data.preco_venda),
-            descricao: data.descricao,
-            // Converte o valor de ativo para booleano ou inteiro aceito pelo banco (0 ou 1)
-            ativo: data.ativo === true || data.ativo === 'true' ? 1 : 0
-        };
+        // Preenche os campos numéricos
+        document.getElementById('preco_compra').value = temp.preco_compra ?? '';
+        document.getElementById('total_imposto').value = temp.total_imposto ?? '';
+        document.getElementById('margem_lucro').value = temp.margem_lucro ?? '';
+        document.getElementById('custo_operacional').value = temp.custo_operacional ?? '';
+        document.getElementById('preco_venda').value = temp.preco_venda ?? '';
 
-        // 3. Executa o insert na tabela criada pela sua migration
-        await knex('produtos').insert(dadosParaSalvar);
+        // Preenche o checkbox ativo
+        document.getElementById('ativo').checked = temp.ativo === true || temp.ativo === 1;
 
-        // 4. Notifica as janelas abertas para atualizar a listagem automaticamente
-        // (Isso faz o api.product.onReload disparar e atualizar o seu DataTable!)
-        if (event.sender && typeof event.sender.send === 'function') {
-            event.sender.send('product:reload'); 
-        }
+        // Muda o título e o botão para modo edição
+        document.querySelector('h2').textContent = 'Editar Produto';
+        document.getElementById('insert').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Atualizar';
+    }
+});
 
-        // Retorna a resposta de sucesso esperada pelo seu front-end
-        return { status: true, msg: 'Produto cadastrado com sucesso!' };
+// Salvar / Atualizar
+document.getElementById('insert').addEventListener('click', async () => {
+    const action = document.getElementById('action').value;
+    const id = document.getElementById('id').value;
 
-    } catch (error) {
-        console.error("🚨 Erro crítico no handle 'product:insert':", error);
-        return { status: false, msg: `Erro interno no banco de dados: ${error.message}` };
+    const data = {
+        action,
+        id,
+        alimentos: document.getElementById('alimentos').value,
+        refeicoes: document.getElementById('refeicoes').value,
+        refeicao_itens: document.getElementById('refeicao_itens').value,
+        preco_compra: document.getElementById('preco_compra').value,
+        total_imposto: document.getElementById('total_imposto').value,
+        margem_lucro: document.getElementById('margem_lucro').value,
+        custo_operacional: document.getElementById('custo_operacional').value,
+        preco_venda: document.getElementById('preco_venda').value,
+        descricao: document.getElementById('descricao').value,
+        ativo: document.getElementById('ativo').checked,
+    };
+
+    let response;
+
+    if (action === 'e' && id) {
+        response = await api.product.update(id, data);
+    } else {
+        response = await api.product.insert(data);
+    }
+
+    if (response && response.status) {
+        toast('success', 'Sucesso', response.msg);
+        setTimeout(() => api.window.close(), 1000);
+    } else {
+        toast('error', 'Erro', response?.msg || 'Não foi possível salvar o produto.');
     }
 });

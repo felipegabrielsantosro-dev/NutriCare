@@ -1,8 +1,10 @@
-import { ipcMain, BrowserWindow } from 'electron';
+import connection from '../database/Connection.js';
+import { ipcMain, BrowserWindow, app } from 'electron';
 import Template from '../mixin/Template.js';
 import Users from '../controller/Users.js';
 import TabelaNutricional from '../controller/TabelaNutricional.js';
 import { Print } from '../mixin/Print.js';
+import Product from '../controller/Product.js';
 
 function getWin(event) {
     return BrowserWindow.fromWebContents(event.sender);
@@ -118,4 +120,57 @@ ipcMain.handle('tabela-nutricional:delete', async (_e, id) => {
     const result = await TabelaNutricional.delete(id);
     if (result.status) broadcastReload('tabela-nutricional:reload');
     return result;
+});
+
+// Produtos
+ipcMain.handle('product:find', async (_e, where = {}) => {
+    return await Product.find(where);
+});
+ipcMain.handle('product:findById', async (_e, id) => {
+    return await Product.findById(id);
+});
+ipcMain.handle('product:insert', async (_e, data) => {
+    const result = await Product.insert(data);
+    if (result.status) broadcastReload('product:reload');
+    return result;
+});
+ipcMain.handle('product:update', async (_e, id, data) => {
+    const result = await Product.update(id, data);
+    if (result.status) broadcastReload('product:reload');
+    return result;
+});
+ipcMain.handle('product:delete', async (_e, id) => {
+    const result = await Product.delete(id);
+    if (result.status) broadcastReload('product:reload');
+    return result;
+});
+
+
+// Dashboard
+ipcMain.handle('dashboard:totais', async () => {
+    const ano = new Date().getFullYear();
+    const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+
+    const [tabelas, usuarios, produtos] = await Promise.all([
+        TabelaNutricional.count(),
+        Users.count(),
+        Product.count(),
+    ]);
+
+    const dadosProdutos = await Product.countPorMes(ano);
+    const dadosUsuarios = await Users.countPorMes(ano);
+
+    return {
+        tabelas,
+        usuarios,
+        produtos,
+        meses,
+        dadosProdutos,
+        dadosUsuarios,
+    };
+});
+
+// Quit
+ipcMain.handle('app:quit', () => {
+    app.quit();
 });

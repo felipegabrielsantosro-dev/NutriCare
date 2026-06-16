@@ -63,5 +63,13 @@ contextBridge.exposeInMainWorld('api', {
         ipcRenderer.on('users:reload', () => callback());
     },
 
+    dashboard: {
+        totais: () => ipcRenderer.invoke('dashboard:totais'),
+    },
+
+    app: {
+        quit: () => ipcRenderer.invoke('app:quit'),
+    },
+
 });
 

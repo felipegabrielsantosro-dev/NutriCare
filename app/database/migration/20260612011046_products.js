@@ -3,7 +3,7 @@
  * @returns { Promise<void> }
  */
 exports.up = function (knex) {
-    return knex.schema.createTable('produtos', function (table) {
+    return knex.schema.createTable('products', function (table) {
         table.increments('id').primary();
 
         // Campos de texto do formulário
@@ -32,5 +32,5 @@ exports.up = function (knex) {
  * @returns { Promise<void> }
  */
 exports.down = function (knex) {
-    return knex.schema.dropTableIfExists('produtos');
+    return knex.schema.dropTableIfExists('products');
 };

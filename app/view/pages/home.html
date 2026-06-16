@@ -57,7 +57,7 @@
         border: none;
         border-radius: 16px;
         overflow: hidden;
-        box-shadow: 0 .125rem .25rem rgba(0,0,0,.075);
+        box-shadow: 0 .125rem .25rem rgba(0, 0, 0, .075);
     }
 
     .chart-card .card-header {
@@ -156,15 +156,15 @@
                 </div>
 
                 <!-- RELATÓRIOS -->
-                <div class="card stats-card bg-danger text-white">
+                <div class="card stats-card bg-danger text-white"
+                    onclick="api.window.open('pages/relatorios', { title: 'Relatórios' })" style="cursor:pointer;">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <div class="stats-number">100%</div>
+                                <div class="stats-number"><i class="fa-solid fa-chart-pie"></i></div>
                                 <p class="stats-label">Relatórios</p>
                             </div>
-
-                            <i class="fa-solid fa-chart-pie stats-icon"></i>
+                            <i class="fa-solid fa-file-pdf stats-icon"></i>
                         </div>
                     </div>
                 </div>
@@ -179,7 +179,7 @@
             <!-- BOAS VINDAS -->
             <div class="card welcome-card mb-4">
                 <div class="card-body">
-                    <h4 class="mb-1">
+                    <h4 class="mb-1" style="color: #fff;">
                         Bem-vindo ao NutriCare 👋
                     </h4>
 
@@ -195,7 +195,7 @@
                 <!-- PRODUTOS -->
                 <div class="col-md-6">
                     <div class="card chart-card h-100">
-                        <div class="card-header">
+                        <div class="card-header" style="color: black;">
                             <i class="fa-solid fa-chart-column me-2"></i>
                             Produtos Cadastrados
                         </div>
@@ -211,7 +211,7 @@
                 <!-- CRESCIMENTO -->
                 <div class="col-md-6">
                     <div class="card chart-card h-100">
-                        <div class="card-header">
+                        <div class="card-header" style="color: black;">
                             <i class="fa-solid fa-chart-line me-2"></i>
                             Crescimento do Sistema
                         </div>
@@ -227,7 +227,7 @@
                 <!-- USUÁRIOS -->
                 <div class="col-md-6">
                     <div class="card chart-card h-100">
-                        <div class="card-header">
+                        <div class="card-header" style="color: black;">
                             <i class="fa-solid fa-users me-2"></i>
                             Usuários por Perfil
                         </div>
@@ -243,7 +243,7 @@
                 <!-- DISTRIBUIÇÃO -->
                 <div class="col-md-6">
                     <div class="card chart-card h-100">
-                        <div class="card-header">
+                        <div class="card-header" style="color: black;">
                             <i class="fa-solid fa-chart-pie me-2"></i>
                             Distribuição do Sistema
                         </div>
@@ -252,6 +252,19 @@
                             <div class="chart-container">
                                 <canvas id="graficoPizza"></canvas>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Exportar PDF -->
+                <div class="card stats-card bg-danger text-white" onclick="exportarPDF()" style="cursor:pointer;">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="stats-number">PDF</div>
+                                <p class="stats-label">Exportar Relatório</p>
+                            </div>
+                            <i class="fa-solid fa-file-pdf stats-icon"></i>
                         </div>
                     </div>
                 </div>
@@ -271,84 +284,10 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-
-document.addEventListener('DOMContentLoaded', () => {
-
-    // PRODUTOS
-    new Chart(document.getElementById('graficoProdutos'), {
-        type: 'bar',
-        data: {
-            labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
-            datasets: [{
-                label: 'Produtos',
-                data: [12, 18, 25, 32, 41, 57],
-                borderRadius: 8
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false
-        }
+    // Aguarda Chart.js carregar antes de inicializar
+    window.addEventListener('DOMContentLoaded', () => {
+        window.__chartsReady = true;
     });
-
-    // CRESCIMENTO
-    new Chart(document.getElementById('graficoUsuarios'), {
-        type: 'line',
-        data: {
-            labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
-            datasets: [{
-                label: 'Usuários',
-                data: [5, 12, 18, 28, 35, 44],
-                tension: 0.4,
-                fill: true
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false
-        }
-    });
-
-    // PERFIS
-    new Chart(document.getElementById('graficoUsuariosMes'), {
-        type: 'doughnut',
-        data: {
-            labels: [
-                'Administradores',
-                'Nutricionistas',
-                'Clientes'
-            ],
-            datasets: [{
-                data: [12, 20, 68]
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false
-        }
-    });
-
-    // DISTRIBUIÇÃO
-    new Chart(document.getElementById('graficoPizza'), {
-        type: 'pie',
-        data: {
-            labels: [
-                'Produtos',
-                'Usuários',
-                'Tabelas'
-            ],
-            datasets: [{
-                data: [57, 44, 150]
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false
-        }
-    });
-
-});
-
 </script>
 
 <script defer type="module" src="file:///{{ assets }}/js/home.js"></script>

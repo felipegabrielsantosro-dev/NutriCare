@@ -179,6 +179,23 @@ export default class Users {
         return row || null;
     }
 
+    static async count() {
+        const result = await connection(Users.table).count('id as count').first();
+        return parseInt(result.count);
+    }
+
+    static async countPorMes(ano) {
+        const rows = await connection(Users.table)
+            .select(connection.raw('EXTRACT(MONTH FROM data_criacao)::int as mes, COUNT(*) as total'))
+            .whereRaw('EXTRACT(YEAR FROM data_criacao) = ?', [ano])
+            .groupByRaw('EXTRACT(MONTH FROM data_criacao)')
+            .orderByRaw('EXTRACT(MONTH FROM data_criacao)');
+
+        const dados = Array(12).fill(0);
+        for (const row of rows) dados[row.mes - 1] = parseInt(row.total);
+        return dados;
+    }
+
     // SANITIZE
     static #sanitize(data) {
 

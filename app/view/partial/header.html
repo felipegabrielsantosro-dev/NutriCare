@@ -18,13 +18,6 @@
             <!-- Menu Principal -->
             <ul class="navbar-nav me-auto">
 
-                <li class="nav-item">
-                    <a class="nav-link" href="#" onclick="api.window.open('pages/home', { title: 'Painel Principal' })">
-                        <i class="fa-solid fa-house"></i>
-                        Dashboard
-                    </a>
-                </li>
-
                 <li class="nav-item dropdown">
 
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
@@ -35,8 +28,7 @@
                     <ul class="dropdown-menu">
 
                         <li>
-                            <span class="dropdown-item"
-                                onclick="api.window.open('pages/list-users', { title: 'Usuários' })"
+                            <span class="dropdown-item" onclick="api.window.open('pages/users', { title: 'Usuários' })"
                                 style="cursor:pointer;">
                                 <i class="fa-solid fa-users text-primary"></i>
                                 Usuários
@@ -45,10 +37,19 @@
 
                         <li>
                             <span class="dropdown-item"
-                                onclick="api.window.open('pages/tabela-nutricional', { title: 'Tabela Nutricional' })"
+                                onclick="api.window.open('pages/nutricional', { title: 'Tabela Nutricional' })"
                                 style="cursor:pointer;">
                                 <i class="fa-solid fa-table text-success"></i>
                                 Tabelas Nutricionais
+                            </span>
+                        </li>
+
+                        <li>
+                            <span class="dropdown-item"
+                                onclick="api.window.open('pages/product', { title: 'Tabela Nutricional' })"
+                                style="cursor:pointer;">
+                                <i class="fa-solid fa-box text-warning"></i>
+                                Produtos
                             </span>
                         </li>
 
@@ -66,14 +67,16 @@
                     <ul class="dropdown-menu">
 
                         <li>
-                                <span class="dropdown-item" onclick="api.window.open('pages/relatorio-nutricional', { title: 'Tabela Nutricional' })"  style="cursor:pointer;">
-                                    <i class="fa-solid fa-chart-pie"></i>
-                                    Relatório Nutricional
-                                </span>
+                            <span class="dropdown-item"
+                                onclick="api.window.open('pages/relatorio-nutricional', { title: 'Tabela Nutricional' })"
+                                style="cursor:pointer;">
+                                <i class="fa-solid fa-chart-pie"></i>
+                                Relatório Nutricional
+                            </span>
                         </li>
 
                         <li>
-                            <span class="dropdown-item" style="cursor:pointer;">
+                            <span class="dropdown-item" style="cursor:pointer;" onclick="exportarPDF()">
                                 <i class="fa-solid fa-file-pdf"></i>
                                 Exportar PDF
                             </span>
@@ -81,6 +84,12 @@
 
                     </ul>
 
+                </li>
+
+                <li class="nav-item">
+                    <span class="nav-link small text-light">
+                        v1.0.0
+                    </span>
                 </li>
 
             </ul>
@@ -100,27 +109,8 @@
                     </a>
 
                     <ul class="dropdown-menu dropdown-menu-end">
-
                         <li>
-                            <span class="dropdown-item">
-                                <i class="fa-solid fa-user"></i>
-                                Meu Perfil
-                            </span>
-                        </li>
-
-                        <li>
-                            <span class="dropdown-item">
-                                <i class="fa-solid fa-gear"></i>
-                                Configurações
-                            </span>
-                        </li>
-
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
-
-                        <li>
-                            <span class="dropdown-item text-danger">
+                            <span class="dropdown-item text-danger" style="cursor:pointer;" onclick="api.app.quit()">
                                 <i class="fa-solid fa-right-from-bracket"></i>
                                 Sair
                             </span>
