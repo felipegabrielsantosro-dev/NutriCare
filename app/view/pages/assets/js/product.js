@@ -1,3 +1,51 @@
+import { SellingPriceCalculator } from '../components/SellingPriceCalculator.js';
+
+// Função responsável por instanciar e rodar o cálculo fluido
+function calcularPrecoVendaAutomatico() {
+    // 1. Captura os elementos do DOM
+    const precoCompraInput = document.getElementById('preco_compra');
+    const totalImpostoInput = document.getElementById('total_imposto');
+    const margemLucroInput = document.getElementById('margem_lucro');
+    const custoOperacionalInput = document.getElementById('custo_operacional');
+    const precoVendaInput = document.getElementById('preco_venda');
+
+    // 2. Converte os valores para Float (usa 0 se estiver vazio)
+    const precoCompra = parseFloat(precoCompraInput.value) || 0;
+    const totalImposto = parseFloat(totalImpostoInput.value) || 0;
+    const margemLucro = parseFloat(margemLucroInput.value) || 0;
+    const custoOperacional = parseFloat(custoOperacionalInput.value) || 0;
+
+    // 3. Regra de segurança: O preço de compra precisa ser maior que zero 
+    // para não disparar o RangeError da classe à toa enquanto digita
+    if (precoCompra <= 0) {
+        precoVendaInput.value = '';
+        return;
+    }
+
+    try {
+        // 4. Executa o encadeamento fluido (padrão Builder) da sua classe
+        const resultado = SellingPriceCalculator.create()
+            .addPurchasePrice(precoCompra)
+            .addTotalTax(totalImposto)
+            .addProfitMargin(margemLucro)
+            .addOperatingCost(custoOperacional)
+            .getData(); // Executa validações matemáticas e retorna o objeto decomposto
+
+        // 5. Aplica o preço de venda sugerido final de volta na tela
+        precoVendaInput.value = resultado.valor_venda_sugerido.toFixed(2);
+
+        // Remove qualquer marcação de erro prévia se o cálculo funcionou
+        precoVendaInput.classList.remove('is-invalid');
+    } catch (error) {
+        // Se a soma dos percentuais der >= 100% ou falhar nas regras da sua classe:
+        precoVendaInput.value = '';
+        precoVendaInput.classList.add('is-invalid');
+
+        // Opcional: printar no console de desenvolvimento o motivo do bloqueio do cálculo
+        console.warn('Cálculo bloqueado temporariamente:', error.message);
+    }
+}
+
 // Carrega os dados do temp quando for edição
 window.addEventListener('DOMContentLoaded', async () => {
     const temp = await api.temp.get('product:edit');
@@ -27,6 +75,18 @@ window.addEventListener('DOMContentLoaded', async () => {
         document.querySelector('h2').textContent = 'Editar Produto';
         document.getElementById('insert').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Atualizar';
     }
+
+    // =========================================================================
+    // Ouvintes em tempo real mapeados para disparar o cálculo
+    // =========================================================================
+    const camposCusto = ['preco_compra', 'total_imposto', 'margem_lucro', 'custo_operacional'];
+
+    camposCusto.forEach(id => {
+        const elemento = document.getElementById(id);
+        if (elemento) {
+            elemento.addEventListener('input', calcularPrecoVendaAutomatico);
+        }
+    });
 });
 
 // Salvar / Atualizar
