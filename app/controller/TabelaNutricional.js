@@ -206,6 +206,23 @@ export default class TabelaNutricional {
         }
     }
 
+    static async count() {
+        const result = await connection(TabelaNutricional.table).count('id as count').first();
+        return parseInt(result.count);
+    }
+
+    static async countPorMes(ano) {
+        const rows = await connection(TabelaNutricional.table)
+            .select(connection.raw('EXTRACT(MONTH FROM criado_em)::int as mes, COUNT(*) as total'))
+            .whereRaw('EXTRACT(YEAR FROM criado_em) = ?', [ano])
+            .groupByRaw('EXTRACT(MONTH FROM criado_em)')
+            .orderByRaw('EXTRACT(MONTH FROM criado_em)');
+
+        const dados = Array(12).fill(0);
+        for (const row of rows) dados[row.mes - 1] = parseInt(row.total);
+        return dados;
+    }
+
     static async delete(id) {
         try {
             await connection(TabelaNutricional.table)

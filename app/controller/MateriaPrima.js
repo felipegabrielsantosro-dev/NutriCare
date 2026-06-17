@@ -1,28 +1,27 @@
 import connection from '../database/Connection.js';
 
-export default class Users {
+export default class MateriaPrima {
 
     // Tabela no banco
-    static table = 'users';
+    static table = 'materia_prima';
 
     // Mapeamento: índice da coluna no DataTable → nome no banco
     static #columns = [
         'id',
         'nome',
-        'email',
-        'sexo',
-        'idade',
-        'altura',
-        'peso',
+        'codigo',
+        'fornecedor',
+        'unidade_medida',
+        'preco',
         'data_criacao',
         null
     ];
 
-    // Colunas pesquisáveis
+    // Colunas pesquisáveis no filtro global
     static #searchable = [
         'nome',
-        'email',
-        'sexo',
+        'codigo',
+        'fornecedor',
     ];
 
     // INSERIR
@@ -32,25 +31,17 @@ export default class Users {
             return { status: false, msg: 'O campo nome é obrigatório', id: null, data: [] };
         }
 
-        if (!data.email || data.email.trim() === '') {
-            return { status: false, msg: 'O campo email é obrigatório', id: null, data: [] };
-        }
-
-        if (!data.senha || data.senha.trim() === '') {
-            return { status: false, msg: 'O campo senha é obrigatório', id: null, data: [] };
-        }
-
         try {
 
-            const clean = Users.#sanitize(data);
+            const clean = MateriaPrima.#sanitize(data);
 
-            const [result] = await connection(Users.table)
+            const [result] = await connection(MateriaPrima.table)
                 .insert(clean)
                 .returning('*');
 
             return {
                 status: true,
-                msg: 'Usuário salvo com sucesso!',
+                msg: 'Matéria-Prima salva com sucesso!',
                 id: result.id,
                 data: [result]
             };
@@ -65,7 +56,7 @@ export default class Users {
         }
     }
 
-    // LISTAR (DataTable)
+    // LISTAR (DataTable com paginação e busca avançada)
     static async find(data = {}) {
 
         const {
@@ -77,14 +68,14 @@ export default class Users {
             draw = 1
         } = data;
 
-        const [{ count: total }] = await connection(Users.table).count('id as count');
+        const [{ count: total }] = await connection(MateriaPrima.table).count('id as count');
 
         const search = term?.trim();
 
         function applySearch(query) {
             if (search) {
                 query.where(function () {
-                    for (const col of Users.#searchable) {
+                    for (const col of MateriaPrima.#searchable) {
                         this.orWhereRaw(`CAST("${col}" AS TEXT) ILIKE ?`, [`%${search}%`]);
                     }
                 });
@@ -92,14 +83,14 @@ export default class Users {
             return query;
         }
 
-        const filteredQ = connection(Users.table).count('id as count');
+        const filteredQ = connection(MateriaPrima.table).count('id as count');
         applySearch(filteredQ);
         const [{ count: filtered }] = await filteredQ;
 
-        const orderColumn = Users.#columns[column] || 'id';
+        const orderColumn = MateriaPrima.#columns[column] || 'id';
         const orderDir = orderType === 'desc' ? 'desc' : 'asc';
 
-        const dataQ = connection(Users.table).select('*');
+        const dataQ = connection(MateriaPrima.table).select('*');
 
         applySearch(dataQ);
         dataQ.orderBy(orderColumn, orderDir);
@@ -121,8 +112,8 @@ export default class Users {
         if (!id) return { status: false, msg: 'ID é obrigatório' };
 
         try {
-            await connection(Users.table).where({ id }).del();
-            return { status: true, msg: 'Usuário excluído com sucesso!' };
+            await connection(MateriaPrima.table).where({ id }).del();
+            return { status: true, msg: 'Matéria-Prima excluída com sucesso!' };
         } catch (err) {
             return { status: false, msg: 'Erro: ' + err.message };
         }
@@ -139,22 +130,22 @@ export default class Users {
 
         try {
 
-            const clean = Users.#sanitize(data);
+            const clean = MateriaPrima.#sanitize(data);
 
             delete clean.id;
 
-            const [result] = await connection(Users.table)
+            const [result] = await connection(MateriaPrima.table)
                 .where({ id })
                 .update(clean)
                 .returning('*');
 
             if (!result) {
-                return { status: false, msg: 'Usuário não encontrado', data: [] };
+                return { status: false, msg: 'Matéria-Prima não encontrada', data: [] };
             }
 
             return {
                 status: true,
-                msg: 'Usuário atualizado com sucesso!',
+                msg: 'Matéria-Prima atualizada com sucesso!',
                 id: result.id,
                 data: [result]
             };
@@ -172,20 +163,21 @@ export default class Users {
     static async findById(id) {
         if (!id) return null;
 
-        const row = await connection(Users.table)
+        const row = await connection(MateriaPrima.table)
             .where({ id })
             .first();
 
         return row || null;
     }
 
+    // Métodos para o Dashboard
     static async count() {
-        const result = await connection(Users.table).count('id as count').first();
+        const result = await connection(MateriaPrima.table).count('id as count').first();
         return parseInt(result.count);
     }
 
     static async countPorMes(ano) {
-        const rows = await connection(Users.table)
+        const rows = await connection(MateriaPrima.table)
             .select(connection.raw('EXTRACT(MONTH FROM data_criacao)::int as mes, COUNT(*) as total'))
             .whereRaw('EXTRACT(YEAR FROM data_criacao) = ?', [ano])
             .groupByRaw('EXTRACT(MONTH FROM data_criacao)')
@@ -199,14 +191,13 @@ export default class Users {
     // SANITIZE
     static #sanitize(data) {
 
-        const ignore = ['id', 'action'];
+        // Adicione o 'ativo' aqui na lista de ignorados
+        const ignore = ['id', 'action', 'ativo'];
 
         const clean = {};
 
         for (const [key, value] of Object.entries(data)) {
-
             if (ignore.includes(key)) continue;
-
             if (value === '' || value === null || value === undefined) continue;
 
             if (value === 'true') { clean[key] = true; continue; }

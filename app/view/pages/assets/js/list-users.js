@@ -61,14 +61,17 @@ async function editUser(id) {
             return;
         }
 
+        // Define o estado temporário idêntico ao que fizemos nos produtos
         await api.temp.set('user:edit', {
             action: 'e',
             ...user,
         });
 
-        api.window.open('pages/users', {
-            width: 600,
-            height: 500,
+        // CORREÇÃO: Mudou de api.window.open para api.window.openModal
+        // E ajustou o tamanho (900x600) para manter o padrão correto do seu form
+        api.window.openModal('pages/users', {
+            width: 900,
+            height: 600,
             title: 'Editar Usuário',
         });
 

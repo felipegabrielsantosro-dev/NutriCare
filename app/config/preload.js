@@ -63,5 +63,22 @@ contextBridge.exposeInMainWorld('api', {
         ipcRenderer.on('users:reload', () => callback());
     },
 
+    dashboard: {
+        totais: () => ipcRenderer.invoke('dashboard:totais'),
+    },
+
+    app: {
+        quit: () => ipcRenderer.invoke('app:quit'),
+    },
+
+    materiaPrima: {
+        insert: (data) => ipcRenderer.invoke('materia-prima:insert', data),
+        update: (id, data) => ipcRenderer.invoke('materia-prima:update', id, data),
+        delete: (id) => ipcRenderer.invoke('materia-prima:delete', id),
+        find: (filter) => ipcRenderer.invoke('materia-prima:find', filter),
+        findById: (id) => ipcRenderer.invoke('materia-prima:findById', id),
+        onReload: (callback) => ipcRenderer.on('materia-prima:reload', callback)
+    }
+
 });
 

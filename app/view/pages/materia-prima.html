@@ -1,0 +1,147 @@
+{% extends "layouts/main.html" %}
+
+{% block styles %}
+
+<link rel="stylesheet" href="file:///{{ assets }}/css/materia-prima.css">
+{% endblock %}
+
+{% block title %}Cadastro de Matéria-Prima{% endblock %}
+
+{% block content %}
+
+<form id="form">
+
+<input type="hidden" id="id" name="id">
+<input type="hidden" id="action" name="action">
+
+    <div class="row">
+
+        <div class="col-md-6">
+            <div class="form-floating mb-3">
+                <input type="text" class="form-control" id="nome" name="nome">
+                <label>Matéria-Prima</label>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="form-floating mb-3">
+                <input type="text" class="form-control" id="categoria" name="categoria">
+                <label>Categoria</label>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="form-floating mb-3">
+                <input type="text" class="form-control" id="unidade_medida" name="unidade_medida">
+                <label>Unidade</label>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="row">
+
+        <div class="col-md-3">
+            <div class="form-floating mb-3">
+                <input type="number" step="0.01" class="form-control" id="preco_compra" name="preco_compra">
+                <label>Preço Compra (R$)</label>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="form-floating mb-3">
+                <input type="number" step="0.001" class="form-control" id="peso_bruto" name="peso_bruto">
+                <label>PB (kg/B)</label>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="form-floating mb-3">
+                <input type="number" step="0.001" class="form-control" id="peso_liquido" name="peso_liquido">
+                <label>PL (kg/l)</label>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="form-floating mb-3">
+                <input type="number" class="form-control" id="fator_correcao" name="fator_correcao" readonly>
+                <label>FC</label>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="row">
+
+        <div class="col-md-6">
+            <div class="form-floating mb-3">
+                <input type="number" step="0.01" class="form-control" id="custo_por_kg" name="custo_por_kg" readonly>
+                <label>Custo/Kg</label>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="form-floating mb-3">
+                <input type="number" step="0.01" class="form-control" id="custo_por_litro" name="custo_por_litro"
+                    readonly>
+                <label>Custo/L</label>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="form-floating mb-3">
+                <input type="number" step="0.01" class="form-control" id="preco_venda" name="preco_venda" readonly>
+                <label>Preço Venda (R$)</label>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="form-floating mb-3">
+                <input type="number" step="0.01" class="form-control" id="valor_total" name="valor_total" readonly>
+                <label>Valor Total (R$)</label>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="form-floating mb-3">
+                <input type="number" class="form-control" id="margem_lucro" name="margem_lucro" value="30" readonly>
+                <label>Margem Lucro (%)</label>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="row">
+
+        <div class="col-md-3 mb-3">
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="ativo" name="ativo" checked>
+                <label class="form-check-label">Ativo</label>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <div class="form-floating">
+                <textarea class="form-control" id="observacoes" name="observacoes" style="height:120px"></textarea>
+                <label>Observações</label>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="mt-3">
+        <button type="button" class="btn btn-success" id="insert">
+            <i class="fa-solid fa-floppy-disk"></i>
+            Salvar
+        </button>
+    </div>
+
+</form>
+
+{% endblock %}
+
+{% block scripts %}
+
+<script type="module" src="file:///{{ assets }}/js/materia-prima.js"></script>
+
+{% endblock %}

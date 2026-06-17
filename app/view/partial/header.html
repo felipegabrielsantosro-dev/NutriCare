@@ -1,138 +1,39 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-success shadow-sm">
-    <div class="container-fluid">
+<ul class="dropdown-menu">
 
-        <!-- Logo -->
-        <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="#">
-            <i class="fa-solid fa-heart-pulse fs-4"></i>
-            <span>NutriCare</span>
-        </a>
+    <li>
+        <span class="dropdown-item"
+            onclick="api.window.open('pages/users', { title: 'Usuários' })"
+            style="cursor:pointer;">
+            <i class="fa-solid fa-users text-primary"></i>
+            Usuários
+        </span>
+    </li>
 
-        <!-- Menu Mobile -->
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown"
-            aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Alternar navegação">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+    <li>
+        <span class="dropdown-item"
+            onclick="api.window.open('pages/nutricional', { title: 'Tabela Nutricional' })"
+            style="cursor:pointer;">
+            <i class="fa-solid fa-table text-success"></i>
+            Tabelas Nutricionais
+        </span>
+    </li>
 
-        <div class="collapse navbar-collapse" id="navbarNavDropdown">
+    <li>
+        <span class="dropdown-item"
+            onclick="api.window.open('pages/product', { title: 'Produtos' })"
+            style="cursor:pointer;">
+            <i class="fa-solid fa-box text-warning"></i>
+            Produtos
+        </span>
+    </li>
 
-            <!-- Menu Principal -->
-            <ul class="navbar-nav me-auto">
+    <li>
+        <span class="dropdown-item"
+            onclick="api.window.open('pages/ingredientes', { title: 'Ingredientes' })"
+            style="cursor:pointer;">
+            <i class="fa-solid fa-carrot text-danger"></i>
+            Ingredientes
+        </span>
+    </li>
 
-                <li class="nav-item">
-                    <a class="nav-link" href="#" onclick="api.window.open('pages/home', { title: 'Painel Principal' })">
-                        <i class="fa-solid fa-house"></i>
-                        Dashboard
-                    </a>
-                </li>
-
-                <li class="nav-item dropdown">
-
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                        <i class="fa-solid fa-folder-plus"></i>
-                        Cadastros
-                    </a>
-
-                    <ul class="dropdown-menu">
-
-                        <li>
-                            <span class="dropdown-item"
-                                onclick="api.window.open('pages/list-users', { title: 'Usuários' })"
-                                style="cursor:pointer;">
-                                <i class="fa-solid fa-users text-primary"></i>
-                                Usuários
-                            </span>
-                        </li>
-
-                        <li>
-                            <span class="dropdown-item"
-                                onclick="api.window.open('pages/tabela-nutricional', { title: 'Tabela Nutricional' })"
-                                style="cursor:pointer;">
-                                <i class="fa-solid fa-table text-success"></i>
-                                Tabelas Nutricionais
-                            </span>
-                        </li>
-
-                    </ul>
-
-                </li>
-
-                <li class="nav-item dropdown">
-
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                        <i class="fa-solid fa-chart-column"></i>
-                        Relatórios
-                    </a>
-
-                    <ul class="dropdown-menu">
-
-                        <li>
-                                <span class="dropdown-item" onclick="api.window.open('pages/relatorio-nutricional', { title: 'Tabela Nutricional' })"  style="cursor:pointer;">
-                                    <i class="fa-solid fa-chart-pie"></i>
-                                    Relatório Nutricional
-                                </span>
-                        </li>
-
-                        <li>
-                            <span class="dropdown-item" style="cursor:pointer;">
-                                <i class="fa-solid fa-file-pdf"></i>
-                                Exportar PDF
-                            </span>
-                        </li>
-
-                    </ul>
-
-                </li>
-
-            </ul>
-
-
-            <!-- Perfil -->
-            <ul class="navbar-nav">
-
-                <li class="nav-item dropdown">
-
-                    <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" role="button"
-                        data-bs-toggle="dropdown">
-
-                        <i class="fa-solid fa-circle-user fs-5"></i>
-                        <span>Administrador</span>
-
-                    </a>
-
-                    <ul class="dropdown-menu dropdown-menu-end">
-
-                        <li>
-                            <span class="dropdown-item">
-                                <i class="fa-solid fa-user"></i>
-                                Meu Perfil
-                            </span>
-                        </li>
-
-                        <li>
-                            <span class="dropdown-item">
-                                <i class="fa-solid fa-gear"></i>
-                                Configurações
-                            </span>
-                        </li>
-
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
-
-                        <li>
-                            <span class="dropdown-item text-danger">
-                                <i class="fa-solid fa-right-from-bracket"></i>
-                                Sair
-                            </span>
-                        </li>
-
-                    </ul>
-
-                </li>
-
-            </ul>
-
-        </div>
-
-    </div>
-</nav>
+</ul>
