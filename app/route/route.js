@@ -181,6 +181,11 @@ ipcMain.handle('materia-prima:find', async (_e, data = {}) => {
     return await MateriaPrima.find(data);
 });
 
+// Matéria-Prima
+ipcMain.handle('materia-prima:find', async (_e, data = {}) => {
+    return await MateriaPrima.find(data);
+});
+
 ipcMain.handle('materia-prima:findById', async (_e, id) => {
     return await MateriaPrima.findById(id);
 });
@@ -202,3 +207,4 @@ ipcMain.handle('materia-prima:delete', async (_e, id) => {
     if (result.status) broadcastReload('materia-prima:reload');
     return result;
 });
+
