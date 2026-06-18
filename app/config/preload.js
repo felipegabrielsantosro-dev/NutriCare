@@ -72,12 +72,29 @@ contextBridge.exposeInMainWorld('api', {
     },
 
     materiaPrima: {
-        insert: (data) => ipcRenderer.invoke('materia-prima:insert', data),
-        update: (id, data) => ipcRenderer.invoke('materia-prima:update', id, data),
-        delete: (id) => ipcRenderer.invoke('materia-prima:delete', id),
-        find: (filter) => ipcRenderer.invoke('materia-prima:find', filter),
-        findById: (id) => ipcRenderer.invoke('materia-prima:findById', id),
-        onReload: (callback) => ipcRenderer.on('materia-prima:reload', callback)
+        insert: (data) => ipcRenderer.invoke('materia_prima:insert', data),
+        update: (id, data) => ipcRenderer.invoke('materia_prima:update', id, data),
+        delete: (id) => ipcRenderer.invoke('materia_prima:delete', id),
+        find: (filter) => ipcRenderer.invoke('materia_prima:find', filter),
+        findById: (id) => ipcRenderer.invoke('materia_prima:findById', id),
+        onReload: (callback) => ipcRenderer.on('materia_prima:reload', callback)
+    },
+
+    fichaTecnica: {
+        insert: (data) =>
+            ipcRenderer.invoke('ficha-tecnica:insert', data),
+
+        update: (id, data) =>
+            ipcRenderer.invoke('ficha-tecnica:update', id, data),
+
+        delete: (id) =>
+            ipcRenderer.invoke('ficha-tecnica:delete', id),
+
+        find: (filter) =>
+            ipcRenderer.invoke('ficha-tecnica:find', filter),
+
+        findById: (id) =>
+            ipcRenderer.invoke('ficha-tecnica:findById', id)
     }
 
 });

@@ -1,86 +1,102 @@
-import { Datatables } from "../components/Datatables.js";
+import { Datatables } from '../components/datatables.js';
 
-// Escuta o evento de recarregamento vindo do processo principal do Electron
-if (window.api && api.product && typeof api.product.onReload === 'function') {
-    api.product.onReload(() => {
-        $('#table-products').DataTable().ajax.reload(null, false);
-    });
-}
-
-// Inicializa a tabela de produtos com o componente padrão do sistema
+// Inicializa a tabela trazendo de volta as colunas de precificação
 Datatables.SetTable('#table-products', [
     { data: 'id' },
-    { data: 'alimentos' },
-    { data: 'refeicoes' },
-    { 
+    { data: 'alimentos' }, // Coluna Alimento / Produto
+    { data: 'refeicoes' }, // Coluna Refeição
+
+    // RETORNADO: Formatação para moeda R$
+    {
         data: 'preco_compra',
-        render: function (data) { return formatarMoeda(data); }
-    },
-    { 
-        data: 'preco_venda',
-        render: function (data) { return formatarMoeda(data); }
-    },
-    { 
-        data: 'margem_lucro',
-        render: function (data) { return data ? `${parseFloat(data).toFixed(2)}%` : '0.00%'; }
-    },
-    { 
-        data: 'ativo',
-        render: function (data) {
-            return data 
-                ? '<span class="badge bg-success">Ativo</span>' 
-                : '<span class="badge bg-danger">Inativo</span>';
+        render(data) {
+            return `R$ ${parseFloat(data || 0).toFixed(2)}`;
         }
     },
+
+    // RETORNADO: Formatação para moeda R$
+    {
+        data: 'preco_venda',
+        render(data) {
+            return `R$ ${parseFloat(data || 0).toFixed(2)}`;
+        }
+    },
+
+    // RETORNADO: Formatação para percentual %
+    {
+        data: 'margem_lucro',
+        render(data) {
+            return `${parseFloat(data || 0).toFixed(2)}%`;
+        }
+    },
+
+    {
+        data: 'ativo',
+        render(data) {
+            const isActive = data === true || data === 1;
+            return isActive
+                ? `<span class="badge bg-success">Ativo</span>`
+                : `<span class="badge bg-danger">Inativo</span>`;
+        }
+    },
+
     {
         data: null,
         orderable: false,
         searchable: false,
-        render: function (row) {
+        render(data, type, row) {
             return `
-                <button onclick="editProduct(${row.id})" class="btn btn-xs btn-warning btn-sm">
-                    <i class="fa-solid fa-pen-to-square"></i> Editar
+                <button onclick="editProduct(${row.id})"
+                        class="btn btn-warning btn-sm">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                    Editar
                 </button>
-                <button onclick="deleteProduct(${row.id})" class="btn btn-xs btn-danger btn-sm">
-                    <i class="fa-solid fa-trash"></i> Excluir
+
+                <button onclick="deleteProduct(${row.id})"
+                        class="btn btn-danger btn-sm">
+                    <i class="fa-solid fa-trash"></i>
+                    Excluir
                 </button>
             `;
         }
     }
-]).getData(filter => api.product.find(filter)); 
-// Nota: Se seu backend usar list/findAll em vez de find, altere o "api.product.find(filter)" acima para a função exata de busca com filtros.
+]).getData((filter) => api.product.find(filter));
 
-/**
- * Ação de exclusão de produto com o SweetAlert2 (Swal) integrado
- */
+// Escuta o recarregamento assíncrono do Electron (quando salvar ou atualizar um produto)
+api.product.onReload(() => {
+    if ($.fn.DataTable.isDataTable('#table-products')) {
+        $('#table-products').DataTable().ajax.reload(null, false);
+    }
+});
+
+// =========================================================================
+// FUNÇÕES DE AÇÃO (EXPOSTAS PARA O WINDOW)
+// =========================================================================
+
 async function deleteProduct(id) {
     const result = await Swal.fire({
         title: 'Tem certeza?',
-        text: 'Esta ação não pode ser desfeita.',
+        text: 'Deseja realmente excluir este produto?',
         icon: 'warning',
         showCancelButton: true,
         confirmButtonText: 'Sim, excluir',
-        cancelButtonText: 'Cancelar',
+        cancelButtonText: 'Cancelar'
     });
 
     if (result.isConfirmed) {
         const response = await api.product.delete(id);
 
-        if (response && response.status) {
-            toast('success', 'Excluído', response.msg || 'Produto removido com sucesso.');
-            $('#table-products').DataTable().ajax.reload();
+        if (response.status) {
+            toast('success', 'Excluído', response.msg);
+            $('#table-products').DataTable().ajax.reload(null, false);
         } else {
-            toast('error', 'Erro', (response && response.msg) || 'Não foi possível excluir o produto.');
+            toast('error', 'Erro', response.msg);
         }
     }
 }
 
-/**
- * Ação de busca e preparação de dados para o modal de Edição
- */
 async function editProduct(id) {
     try {
-        // Busca os dados do produto específico pelo ID
         const product = await api.product.findById(id);
 
         if (!product) {
@@ -88,17 +104,17 @@ async function editProduct(id) {
             return;
         }
 
-        // Salva temporariamente no estado do Electron indicando a Action 'e' (edição)
+        // Passa os dados para o cache temporário
         await api.temp.set('product:edit', {
             action: 'e',
-            ...product,
+            ...product
         });
 
-        // Abre o modal de cadastro parametrizado
+        // Abre a modal mapeada na rota 'pages/product'
         api.window.openModal('pages/product', {
             width: 900,
             height: 600,
-            title: 'Editar Produto',
+            title: 'Editar Produto'
         });
 
     } catch (err) {
@@ -106,14 +122,6 @@ async function editProduct(id) {
     }
 }
 
-/**
- * Função utilitária para converter decimais na máscara de moeda brasileira
- */
-function formatarMoeda(valor) {
-    if (valor === null || valor === undefined || isNaN(valor)) return 'R$ 0,00';
-    return parseFloat(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-}
-
-// Expõe globalmente no escopo do window para que os gatilhos 'onclick' do HTML/DataTables encontrem as funções
+// Vincula ao escopo global por causa do type="module" do script
 window.deleteProduct = deleteProduct;
 window.editProduct = editProduct;

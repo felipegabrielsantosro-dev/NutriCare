@@ -6,6 +6,7 @@ import TabelaNutricional from '../controller/TabelaNutricional.js';
 import { Print } from '../mixin/Print.js';
 import Product from '../controller/Product.js';
 import MateriaPrima from '../controller/MateriaPrima.js';
+import FichaTecnica from '../controller/FichaTecnica.js';
 
 function getWin(event) {
     return BrowserWindow.fromWebContents(event.sender);
@@ -177,34 +178,55 @@ ipcMain.handle('app:quit', () => {
 });
 
 // Matéria-Prima
-ipcMain.handle('materia-prima:find', async (_e, data = {}) => {
+ipcMain.handle('materia_prima:find', async (_e, data = {}) => {
     return await MateriaPrima.find(data);
 });
 
-// Matéria-Prima
-ipcMain.handle('materia-prima:find', async (_e, data = {}) => {
-    return await MateriaPrima.find(data);
-});
-
-ipcMain.handle('materia-prima:findById', async (_e, id) => {
+ipcMain.handle('materia_prima:findById', async (_e, id) => {
     return await MateriaPrima.findById(id);
 });
 
-ipcMain.handle('materia-prima:insert', async (_e, data) => {
+ipcMain.handle('materia_prima:insert', async (_e, data) => {
     const result = await MateriaPrima.insert(data);
-    if (result.status) broadcastReload('materia-prima:reload');
+    if (result.status) broadcastReload('materia_prima:reload');
     return result;
 });
 
-ipcMain.handle('materia-prima:update', async (_e, id, data) => {
+ipcMain.handle('materia_prima:update', async (_e, id, data) => {
     const result = await MateriaPrima.update(id, data);
-    if (result.status) broadcastReload('materia-prima:reload');
+    if (result.status) broadcastReload('materia_prima:reload');
     return result;
 });
 
-ipcMain.handle('materia-prima:delete', async (_e, id) => {
+ipcMain.handle('materia_prima:delete', async (_e, id) => {
     const result = await MateriaPrima.delete(id);
-    if (result.status) broadcastReload('materia-prima:reload');
+    if (result.status) broadcastReload('materia_prima:reload');
     return result;
 });
 
+// ficha técnica
+ipcMain.handle('ficha-tecnica:find', async (_e, where = {}) => {
+    return await FichaTecnica.find(where);
+});
+
+ipcMain.handle('ficha-tecnica:findById', async (_e, id) => {
+    return await FichaTecnica.findById(id);
+});
+
+ipcMain.handle('ficha-tecnica:insert', async (_e, data) => {
+    const result = await FichaTecnica.insert(data);
+    if (result.status) broadcastReload('ficha-tecnica:reload');
+    return result;
+});
+
+ipcMain.handle('ficha-tecnica:update', async (_e, id, data) => {
+    const result = await FichaTecnica.update(id, data);
+    if (result.status) broadcastReload('ficha-tecnica:reload');
+    return result;
+});
+
+ipcMain.handle('ficha-tecnica:delete', async (_e, id) => {
+    const result = await FichaTecnica.delete(id);
+    if (result.status) broadcastReload('ficha-tecnica:reload');
+    return result;
+});

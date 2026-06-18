@@ -1,0 +1,315 @@
+{% extends "layouts/main.html" %}
+
+{% block title %}Cadastro de Ficha Técnica{% endblock %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-12">
+        <h2>Cadastro de Ficha Técnica</h2>
+    </div>
+</div>
+
+<form id="form">
+
+    <input type="hidden" id="id" name="id">
+    <input type="hidden" id="action" name="action">
+
+    <div class="row">
+
+        <div class="col-8">
+            <div class="form-floating mb-3">
+                <input type="text" class="form-control" id="nome_produto" name="nome_produto">
+                <label>Nome do Produto / Ficha</label>
+            </div>
+        </div>
+
+        <div class="col-4">
+            <div class="form-floating mb-3">
+                <input type="text" class="form-control" id="categoria" name="categoria">
+                <label>Categoria</label>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="row">
+
+        <div class="col-4">
+            <div class="form-floating mb-3">
+                <input type="number" class="form-control" id="rendimento" name="rendimento" value="1">
+                <label>Rendimento (Porções/Unidades)</label>
+            </div>
+        </div>
+
+        <div class="col-4">
+            <div class="form-floating mb-3">
+                <input type="number" step="0.001" class="form-control" id="peso_final" name="peso_final">
+                <label>Peso Final Total (kg)</label>
+            </div>
+        </div>
+
+        <div class="col-4">
+            <div class="form-check form-switch mt-3">
+                <input class="form-check-input" type="checkbox" id="ativo" name="ativo" checked>
+                <label class="form-check-label">
+                    Ficha ativa?
+                </label>
+            </div>
+        </div>
+
+    </div>
+
+    <hr>
+
+    <h5>Produtos / Insumos</h5>
+
+    <div class="row">
+
+        <div class="col-4">
+            <div class="form-floating mb-3">
+                <select class="form-select" id="produto_id">
+                    <option value="">Selecione um produto</option>
+                </select>
+                <label>Produto</label>
+            </div>
+        </div>
+
+        <div class="col-3">
+            <div class="form-floating mb-3">
+                <input type="text" class="form-control" id="unidade" placeholder="KG">
+                <label>Unidade</label>
+            </div>
+        </div>
+
+        <div class="col-2">
+            <div class="form-floating mb-3">
+                <input type="number" step="0.001" min="0" class="form-control" id="quantidade" placeholder="0">
+                <label>Quantidade</label>
+            </div>
+        </div>
+
+        <div class="col-3">
+            <button type="button" class="btn btn-primary w-100 h-100" id="add-item">
+                <i class="fa-solid fa-plus"></i>
+                Adicionar
+            </button>
+        </div>
+
+    </div>
+
+    <div class="card mb-4 d-none" id="produto-info">
+
+        <div class="card-header">
+            <strong>Produto Selecionado</strong>
+        </div>
+
+        <div class="card-body">
+
+            <div class="row">
+
+                <div class="col-md-3">
+                    <strong>Preço Compra</strong>
+                    <div id="info-preco">R$ 0,00</div>
+                </div>
+
+                <div class="col-md-3">
+                    <strong>Preço Venda</strong>
+                    <div id="info-venda">R$ 0,00</div>
+                </div>
+
+                <div class="col-md-3">
+                    <strong>Porção</strong>
+                    <div id="info-porcao">0 g</div>
+                </div>
+
+                <div class="col-md-3">
+                    <strong>Porções Embalagem</strong>
+                    <div id="info-porcoes">0</div>
+                </div>
+
+            </div>
+
+            <hr>
+
+            <div class="table-responsive">
+
+                <table class="table table-bordered table-sm">
+
+                    <thead>
+                        <tr>
+                            <th>Nutriente</th>
+                            <th>Valor</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        <tr>
+                            <td>Valor Energético</td>
+                            <td id="info-calorias">0 kcal</td>
+                        </tr>
+
+                        <tr>
+                            <td>Carboidratos</td>
+                            <td id="info-carboidratos">0 g</td>
+                        </tr>
+
+                        <tr>
+                            <td>Açúcares Totais</td>
+                            <td id="info-acucar">0 g</td>
+                        </tr>
+
+                        <tr>
+                            <td>Proteínas</td>
+                            <td id="info-proteinas">0 g</td>
+                        </tr>
+
+                        <tr>
+                            <td>Gorduras Totais</td>
+                            <td id="info-gorduras">0 g</td>
+                        </tr>
+
+                        <tr>
+                            <td>Fibra Alimentar</td>
+                            <td id="info-fibras">0 g</td>
+                        </tr>
+
+                        <tr>
+                            <td>Sódio</td>
+                            <td id="info-sodio">0 mg</td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <hr>
+
+    <h5>Totais Nutricionais da Receita</h5>
+
+    <div class="table-responsive mb-4">
+
+        <table class="table table-bordered">
+
+            <thead>
+                <tr>
+                    <th>Calorias</th>
+                    <th>Proteínas</th>
+                    <th>Carboidratos</th>
+                    <th>Gorduras</th>
+                    <th>Fibra</th>
+                    <th>Sódio</th>
+                    <th>Açúcar</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                <tr>
+                    <td id="total_calorias">0 kcal</td>
+                    <td id="total_proteinas">0 g</td>
+                    <td id="total_carboidratos">0 g</td>
+                    <td id="total_gorduras">0 g</td>
+                    <td id="total_fibras">0 g</td>
+                    <td id="total_sodio">0 mg</td>
+                    <td id="total_acucar">0 g</td>
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <table class="table table-bordered table-striped" id="table-itens">
+
+        <thead>
+
+            <tr>
+                <th>Produto</th>
+                <th>Quantidade</th>
+                <th>Unidade</th>
+                <th>Preço Unitário</th>
+                <th>Total</th>
+                <th width="80">Ação</th>
+            </tr>
+
+        </thead>
+
+        <tbody></tbody>
+
+    </table>
+
+    <div class="card mt-3">
+
+        <div class="card-header">
+            <strong>Resumo da Receita</strong>
+        </div>
+
+        <div class="card-body">
+
+            <div class="row">
+
+                <div class="col-md-3">
+                    <strong>Itens</strong>
+                    <div id="qtd-itens">0</div>
+                </div>
+
+                <div class="col-md-3">
+                    <strong>Peso Total</strong>
+                    <div id="peso-total-receita">0 kg</div>
+                </div>
+
+                <div class="col-md-3">
+                    <strong>Custo Total</strong>
+                    <div id="custo-total-receita">R$ 0,00</div>
+                </div>
+
+                <div class="col-md-3">
+                    <strong>Custo por Porção</strong>
+                    <div id="custo-porcao">R$ 0,00</div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="row">
+
+        <div class="col-12">
+            <div class="form-floating">
+                <textarea class="form-control" id="observacao" name="observacao" style="height:120px"
+                    placeholder="Modo de preparo..."></textarea>
+                <label>Observações / Modo de Preparo</label>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="row mt-3">
+
+        <div class="col-12">
+            <button type="button" class="btn btn-success" id="insert">
+                <i class="fa-solid fa-floppy-disk"></i>
+                Salvar Ficha Técnica
+            </button>
+        </div>
+
+    </div>
+
+</form>
+
+{% endblock %}
+
+{% block scripts %}
+<script defer type="module" src="file:///{{ assets }}/js/ficha-tecnica.js"></script>
+{% endblock %}

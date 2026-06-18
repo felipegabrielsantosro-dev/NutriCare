@@ -76,7 +76,6 @@
     }
 
     @media (max-width: 992px) {
-
         .chart-container {
             height: 260px;
         }
@@ -93,7 +92,6 @@
 {% endblock %}
 
 {% block content %}
-
 <div class="container-fluid">
 
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -105,21 +103,19 @@
 
     <div class="row g-4">
 
-        <!-- SIDEBAR -->
+        <!-- SIDEBAR (COL 3) -->
         <div class="col-xl-3 col-lg-4">
-
             <div class="quick-stats">
 
                 <!-- TABELAS -->
                 <div class="card stats-card bg-primary text-white"
-                    onclick="api.window.open('pages/tabela-nutricional', { title: 'Tabela Nutricional' })">
+                    onclick="api.window.open('pages/list-ficha-tecnica', { title: 'Ficha Técnica Nutricional' })">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <div id="total-tabelas" class="stats-number">150</div>
-                                <p class="stats-label">Tabelas Nutricionais</p>
+                                <p class="stats-label">Fichas Técnicas Nutricionais</p>
                             </div>
-
                             <i class="fa-solid fa-clipboard-list stats-icon"></i>
                         </div>
                     </div>
@@ -134,7 +130,6 @@
                                 <div id="total-usuarios" class="stats-number">44</div>
                                 <p class="stats-label">Usuários</p>
                             </div>
-
                             <i class="fa-solid fa-users stats-icon"></i>
                         </div>
                     </div>
@@ -149,21 +144,20 @@
                                 <div id="total-produtos" class="stats-number">57</div>
                                 <p class="stats-label">Produtos</p>
                             </div>
-
                             <i class="fa-solid fa-box stats-icon"></i>
                         </div>
                     </div>
                 </div>
-                <!-- MATERIA-PRIMA -->
+
+                <!-- materia prima -->
                 <div class="card stats-card bg-info text-white"
-                    onclick="api.window.open('pages/list-materia-prima', { title: 'Materia-Prima' })">
+                    onclick="api.window.open('pages/list-materia-prima', { title: 'Matéria Prima' })">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <div id="total-materia-prima" class="stats-number">0</div>
-                                <p class="stats-label">Materia-Prima</p>
+                                <div id="total-materia_prima" class="stats-number">0</div>
+                                <p class="stats-label">Matéria Prima</p>
                             </div>
-
                             <i class="fa-solid fa-carrot stats-icon"></i>
                         </div>
                     </div>
@@ -171,18 +165,7 @@
 
                 <!-- RELATÓRIOS -->
                 <div class="card stats-card bg-danger text-white"
-                    onclick="api.window.open('pages/relatorios', { title: 'Relatórios' })" style="cursor:pointer;">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <div class="stats-number"><i class="fa-solid fa-chart-pie"></i></div>
-                                <p class="stats-label">Relatórios</p>
-                            </div>
-
-
-                <!-- RELATÓRIOS -->
-                <div class="card stats-card bg-danger text-white"
-                    onclick="api.window.open('pages/relatorios', { title: 'Relatórios' })" style="cursor:pointer;">
+                    onclick="api.window.open('pages/relatorios', { title: 'Relatórios' })">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
@@ -195,20 +178,19 @@
                 </div>
 
             </div>
-
         </div>
 
-        <!-- CONTEÚDO -->
+        <!-- CONTEÚDO PRINCIPAL (COL 9) -->
         <div class="col-xl-9 col-lg-8">
 
             <!-- BOAS VINDAS -->
-            <div class="card welcome-card mb-4">
+            <div class="card welcome-card mb-4" style="background-color: #2c3e50;">
+                <!-- Adicionado cor de fundo escura de exemplo para o texto branco contrastar -->
                 <div class="card-body">
                     <h4 class="mb-1" style="color: #fff;">
                         Bem-vindo ao NutriCare 👋
                     </h4>
-
-                    <p class="text-muted mb-0">
+                    <p class="text-white-50 mb-0">
                         Gerencie tabelas nutricionais, usuários e produtos em um único painel.
                     </p>
                 </div>
@@ -217,14 +199,13 @@
             <!-- GRÁFICOS -->
             <div class="row g-4">
 
-                <!-- PRODUTOS -->
+                <!-- GRÁFICO PRODUTOS -->
                 <div class="col-md-6">
                     <div class="card chart-card h-100">
                         <div class="card-header" style="color: black;">
                             <i class="fa-solid fa-chart-column me-2"></i>
                             Produtos Cadastrados
                         </div>
-
                         <div class="card-body">
                             <div class="chart-container">
                                 <canvas id="graficoProdutos"></canvas>
@@ -233,14 +214,13 @@
                     </div>
                 </div>
 
-                <!-- CRESCIMENTO -->
+                <!-- GRÁFICO CRESCIMENTO -->
                 <div class="col-md-6">
                     <div class="card chart-card h-100">
                         <div class="card-header" style="color: black;">
                             <i class="fa-solid fa-chart-line me-2"></i>
                             Crescimento do Sistema
                         </div>
-
                         <div class="card-body">
                             <div class="chart-container">
                                 <canvas id="graficoUsuarios"></canvas>
@@ -249,14 +229,13 @@
                     </div>
                 </div>
 
-                <!-- USUÁRIOS -->
+                <!-- GRÁFICO USUÁRIOS -->
                 <div class="col-md-6">
                     <div class="card chart-card h-100">
                         <div class="card-header" style="color: black;">
                             <i class="fa-solid fa-users me-2"></i>
                             Usuários por Perfil
                         </div>
-
                         <div class="card-body">
                             <div class="chart-container">
                                 <canvas id="graficoUsuariosMes"></canvas>
@@ -265,14 +244,13 @@
                     </div>
                 </div>
 
-                <!-- DISTRIBUIÇÃO -->
+                <!-- GRÁFICO DISTRIBUIÇÃO -->
                 <div class="col-md-6">
                     <div class="card chart-card h-100">
                         <div class="card-header" style="color: black;">
                             <i class="fa-solid fa-chart-pie me-2"></i>
                             Distribuição do Sistema
                         </div>
-
                         <div class="card-body">
                             <div class="chart-container">
                                 <canvas id="graficoPizza"></canvas>
@@ -281,15 +259,17 @@
                     </div>
                 </div>
 
-                <!-- Exportar PDF -->
-                <div class="card stats-card bg-danger text-white" onclick="exportarPDF()" style="cursor:pointer;">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <div class="stats-number">PDF</div>
-                                <p class="stats-label">Exportar Relatório</p>
+                <!-- EXPORTAR PDF -->
+                <div class="col-12">
+                    <div class="card stats-card bg-danger text-white" onclick="exportarPDF()">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="stats-number">PDF</div>
+                                    <p class="stats-label">Exportar Relatório</p>
+                                </div>
+                                <i class="fa-solid fa-file-pdf stats-icon"></i>
                             </div>
-                            <i class="fa-solid fa-file-pdf stats-icon"></i>
                         </div>
                     </div>
                 </div>
@@ -299,22 +279,16 @@
         </div>
 
     </div>
-
 </div>
-
 {% endblock %}
 
 {% block scripts %}
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <script>
     // Aguarda Chart.js carregar antes de inicializar
     window.addEventListener('DOMContentLoaded', () => {
         window.__chartsReady = true;
     });
 </script>
-
 <script defer type="module" src="file:///{{ assets }}/js/home.js"></script>
-
 {% endblock %}

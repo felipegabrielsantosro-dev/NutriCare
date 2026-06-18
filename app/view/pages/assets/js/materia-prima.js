@@ -68,6 +68,7 @@ calcularMateriaPrima();
 // ==========================
 (async () => {
     try {
+        // CORREÇÃO: Mudado de underline para hífen para sincronizar com list-materia-prima.js
         const editData = await api.temp.get('materia-prima:edit');
 
         if (editData) {

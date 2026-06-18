@@ -1,0 +1,43 @@
+{% extends "layouts/main.html" %}
+
+{% block title %}Fichas Técnicas{% endblock %}
+
+{% block content %}
+<h2>Lista de Fichas Técnicas</h2>
+
+<div class="row">
+    <div class="col-12 mb-2">
+        <button class="btn btn-success"
+            onclick="api.window.openModal('pages/ficha-tecnica', { width: 900, height: 600, title: 'Cadastrar Ficha Técnica' })">
+            <i class="fa-solid fa-plus"></i>
+            Nova ficha técnica
+        </button>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <table class="table table-bordered table-striped" id="table-fichas">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nome do Produto</th>
+                    <th>Categoria</th>
+                    <th>Custo Total</th>
+                    <th>Custo Unitário</th>
+                    <th>Rendimento</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script defer type="module" src="file:///{{ assets }}/js/list-ficha-tecnica.js"></script>
+{% endblock %}

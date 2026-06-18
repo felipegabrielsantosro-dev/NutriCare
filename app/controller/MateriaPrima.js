@@ -5,34 +5,40 @@ export default class MateriaPrima {
     // Tabela no banco
     static table = 'materia_prima';
 
-    // Mapeamento: índice da coluna no DataTable → nome no banco
+    // ALINHADO COM O SEU DATATABLES FRONTEND:
+    // Mapeamento exato do índice da coluna enviado pelo DataTable → nome real na tabela do banco
     static #columns = [
         'id',
         'nome',
-        'codigo',
-        'fornecedor',
+        'categoria',
         'unidade_medida',
-        'preco',
+        'preco_compra',
+        'peso_bruto',
+        'peso_liquido',
+        'fator_correcao',
+        'custo_por_kg',
+        'custo_por_litro',
+        'preco_venda',
+        'valor_total',
         'data_criacao',
-        null
+        'data_atualizacao',
+        'id' // Última coluna (botões de ação) aponta para o ID de segurança para não quebrar a ordenação
     ];
 
-    // Colunas pesquisáveis no filtro global
+    // Colunas pesquisáveis no filtro global (adicionado categoria também)
     static #searchable = [
         'nome',
-        'codigo',
-        'fornecedor',
+        'categoria',
+        'unidade_medida'
     ];
 
     // INSERIR
     static async insert(data) {
-
         if (!data.nome || data.nome.trim() === '') {
             return { status: false, msg: 'O campo nome é obrigatório', id: null, data: [] };
         }
 
         try {
-
             const clean = MateriaPrima.#sanitize(data);
 
             const [result] = await connection(MateriaPrima.table)
@@ -58,53 +64,64 @@ export default class MateriaPrima {
 
     // LISTAR (DataTable com paginação e busca avançada)
     static async find(data = {}) {
+        try {
+            const {
+                term = '',
+                limit = 10,
+                offset = 0,
+                orderType = 'asc',
+                column = 0,
+                draw = 1
+            } = data;
 
-        const {
-            term = '',
-            limit = 10,
-            offset = 0,
-            orderType = 'asc',
-            column = 0,
-            draw = 1
-        } = data;
+            const [{ count: total }] = await connection(MateriaPrima.table).count('id as count');
 
-        const [{ count: total }] = await connection(MateriaPrima.table).count('id as count');
+            const search = term?.trim();
 
-        const search = term?.trim();
-
-        function applySearch(query) {
-            if (search) {
-                query.where(function () {
-                    for (const col of MateriaPrima.#searchable) {
-                        this.orWhereRaw(`CAST("${col}" AS TEXT) ILIKE ?`, [`%${search}%`]);
-                    }
-                });
+            function applySearch(query) {
+                if (search) {
+                    query.where(function () {
+                        for (const col of MateriaPrima.#searchable) {
+                            this.orWhereRaw(`CAST("${col}" AS TEXT) ILIKE ?`, [`%${search}%`]);
+                        }
+                    });
+                }
+                return query;
             }
-            return query;
+
+            const filteredQ = connection(MateriaPrima.table).count('id as count');
+            applySearch(filteredQ);
+            const [{ count: filtered }] = await filteredQ;
+
+            // Pega a coluna correta baseada no array mapeado
+            const orderColumn = MateriaPrima.#columns[column] || 'id';
+            const orderDir = orderType === 'desc' ? 'desc' : 'asc';
+
+            const dataQ = connection(MateriaPrima.table).select('*');
+
+            applySearch(dataQ);
+            dataQ.orderBy(orderColumn, orderDir);
+            dataQ.limit(parseInt(limit));
+            dataQ.offset(parseInt(offset));
+
+            const rows = await dataQ;
+
+            return {
+                draw: parseInt(draw),
+                recordsTotal: parseInt(total),
+                recordsFiltered: parseInt(filtered),
+                data: rows,
+            };
+        } catch (err) {
+            console.error("Erro na busca do DataTables:", err);
+            return {
+                draw: 1,
+                recordsTotal: 0,
+                recordsFiltered: 0,
+                data: [],
+                error: err.message
+            };
         }
-
-        const filteredQ = connection(MateriaPrima.table).count('id as count');
-        applySearch(filteredQ);
-        const [{ count: filtered }] = await filteredQ;
-
-        const orderColumn = MateriaPrima.#columns[column] || 'id';
-        const orderDir = orderType === 'desc' ? 'desc' : 'asc';
-
-        const dataQ = connection(MateriaPrima.table).select('*');
-
-        applySearch(dataQ);
-        dataQ.orderBy(orderColumn, orderDir);
-        dataQ.limit(parseInt(limit));
-        dataQ.offset(parseInt(offset));
-
-        const rows = await dataQ;
-
-        return {
-            draw: parseInt(draw),
-            recordsTotal: parseInt(total),
-            recordsFiltered: parseInt(filtered),
-            data: rows,
-        };
     }
 
     // DELETE
@@ -121,7 +138,6 @@ export default class MateriaPrima {
 
     // UPDATE
     static async update(id, data) {
-
         if (!id) return { status: false, msg: 'ID é obrigatório', data: [] };
 
         if (!data.nome || data.nome.trim() === '') {
@@ -129,7 +145,6 @@ export default class MateriaPrima {
         }
 
         try {
-
             const clean = MateriaPrima.#sanitize(data);
 
             delete clean.id;
@@ -188,11 +203,9 @@ export default class MateriaPrima {
         return dados;
     }
 
-    // SANITIZE
     static #sanitize(data) {
-
-        // Adicione o 'ativo' aqui na lista de ignorados
-        const ignore = ['id', 'action', 'ativo'];
+        // Adicione 'margem_lucro' e 'observacoes' (se necessário) na lista de exclusão
+        const ignore = ['id', 'action', 'ativo', 'margem_lucro'];
 
         const clean = {};
 
