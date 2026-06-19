@@ -43,7 +43,10 @@ async function carregarFichasTecnicas() {
                 }
                 </td>
                 <td>
-                    <button onclick="editFicha(${item.id})" class="btn btn-warning btn-smme-1">
+                    <button onclick="addIngredientes(${item.id})" class="btn btn-dark btn-sm me-1">
+                        <i class="fa-solid fa-plus"></i> Ingredientes
+                    </button>
+                    <button onclick="editFicha(${item.id})" class="btn btn-warning btn-sm me-1">
                         <i class="fa-solid fa-pen-to-square"></i> Editar
                     </button>
                     <button onclick="deleteFicha(${item.id})" class="btn btn-danger btn-sm">
@@ -63,10 +66,24 @@ async function carregarFichasTecnicas() {
 }
 
 // =========================================================================
-// 2. INICIALIZAÇÃO AUTOMÁTICA (DOM LOAD)
+// 2. INICIALIZAÇÃO AUTOMÁTICA E EVENTOS DO DOM
 // =========================================================================
 window.addEventListener('DOMContentLoaded', () => {
     carregarFichasTecnicas();
+
+    // Captura o botão de nova ficha mapeado no HTML para garantir cache limpo
+    const btnNovaFicha = document.getElementById('btn-nova-ficha');
+    if (btnNovaFicha) {
+        btnNovaFicha.addEventListener('click', async () => {
+            await api.temp.set('ficha-tecnica:edit', null).catch(() => { });
+
+            api.window.openModal('pages/ficha-tecnica', {
+                width: 950,
+                height: 650,
+                title: 'Cadastrar Nova Ficha Técnica'
+            });
+        });
+    }
 });
 
 // =========================================================================
@@ -83,6 +100,38 @@ if (api.fichaTecnica && typeof api.fichaTecnica.onReload === 'function') {
 // 4. FUNÇÕES DE AÇÃO DOS BOTÕES (EXPOSTAS NO ESCOPO GLOBAL WINDOW)
 // =========================================================================
 
+async function addIngredientes(id) {
+    try {
+
+        const response = await api.fichaTecnica.findById(id);
+        const ficha = response.data || response;
+
+        if (!ficha) {
+            toast('error', 'Erro', 'Ficha técnica não encontrada.');
+            return;
+        }
+
+        await api.temp.set('ficha-tecnica:ingredientes', {
+            id: ficha.id,
+            nome_produto: ficha.nome_produto
+        });
+
+        api.window.open('pages/ficha-tecnica-ingredientes', {
+            width: 1200,
+            height: 800,
+            title: `Ingredientes - ${ficha.nome_produto}`
+        });
+
+    } catch (err) {
+        console.error(err);
+        toast(
+            'error',
+            'Falha',
+            'Não foi possível abrir a tela de ingredientes.'
+        );
+    }
+}
+
 async function editFicha(id) {
     try {
         const response = await api.fichaTecnica.findById(id);
@@ -93,13 +142,11 @@ async function editFicha(id) {
             return;
         }
 
-        // Envia a ficha e seus sub-itens vinculados para a memória cache do form
         await api.temp.set('ficha-tecnica:edit', {
             action: 'e',
             ...ficha
         });
 
-        // Abre a tela modal mapeada na sua rota de visualização
         api.window.openModal('pages/ficha-tecnica', {
             width: 950,
             height: 650,
@@ -114,7 +161,7 @@ async function editFicha(id) {
 async function deleteFicha(id) {
     const result = await Swal.fire({
         title: 'Tem certeza?',
-        text: 'Esta ação não poderá ser desfeita e removerá os insumos vinculados.',
+        text: 'Esta ação não poderá ser desfeita e removerá os ingredientes vinculados.',
         icon: 'warning',
         showCancelButton: true,
         confirmButtonText: 'Sim, remover',
@@ -129,7 +176,7 @@ async function deleteFicha(id) {
 
             if (response.status) {
                 toast('success', 'Removido', response.message || 'Ficha técnica excluída.');
-                carregarFichasTecnicas(); // Atualiza a lista na hora
+                carregarFichasTecnicas();
             } else {
                 toast('error', 'Erro', response.message || 'Não foi possível excluir.');
             }
@@ -140,5 +187,6 @@ async function deleteFicha(id) {
 }
 
 // Garante o funcionamento dos cliques dos botões devido ao tipo "module" do arquivo script
+window.addIngredientes = addIngredientes;
 window.editFicha = editFicha;
 window.deleteFicha = deleteFicha;

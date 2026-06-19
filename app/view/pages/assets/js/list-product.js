@@ -6,7 +6,7 @@ Datatables.SetTable('#table-products', [
     { data: 'alimentos' }, // Coluna Alimento / Produto
     { data: 'refeicoes' }, // Coluna Refeição
 
-    // RETORNADO: Formatação para moeda R$
+    // Formatação para moeda R$
     {
         data: 'preco_compra',
         render(data) {
@@ -14,7 +14,7 @@ Datatables.SetTable('#table-products', [
         }
     },
 
-    // RETORNADO: Formatação para moeda R$
+    // Formatação para moeda R$
     {
         data: 'preco_venda',
         render(data) {
@@ -22,7 +22,7 @@ Datatables.SetTable('#table-products', [
         }
     },
 
-    // RETORNADO: Formatação para percentual %
+    // Formatação para percentual %
     {
         data: 'margem_lucro',
         render(data) {
@@ -33,7 +33,7 @@ Datatables.SetTable('#table-products', [
     {
         data: 'ativo',
         render(data) {
-            const isActive = data === true || data === 1;
+            const isActive = data === true || data === 1 || data === '1';
             return isActive
                 ? `<span class="badge bg-success">Ativo</span>`
                 : `<span class="badge bg-danger">Inativo</span>`;
@@ -84,41 +84,74 @@ async function deleteProduct(id) {
     });
 
     if (result.isConfirmed) {
-        const response = await api.product.delete(id);
+        try {
+            const response = await api.product.delete(id);
 
-        if (response.status) {
-            toast('success', 'Excluído', response.msg);
-            $('#table-products').DataTable().ajax.reload(null, false);
-        } else {
-            toast('error', 'Erro', response.msg);
+            if (response && response.status) {
+                toast('success', 'Excluído', response.msg || 'Produto removido com sucesso.');
+                if ($.fn.DataTable.isDataTable('#table-products')) {
+                    $('#table-products').DataTable().ajax.reload(null, false);
+                }
+            } else {
+                toast('error', 'Erro', response?.msg || 'Não foi possível excluir o produto.');
+            }
+        } catch (err) {
+            console.error("Erro ao deletar produto:", err);
+            toast('error', 'Erro', err.message);
         }
     }
 }
 
 async function editProduct(id) {
     try {
-        const product = await api.product.findById(id);
+        const response = await api.product.findById(id);
 
-        if (!product) {
-            toast('error', 'Erro', 'Produto não encontrado.');
+        // 1. ANÁLISE DE SEGURANÇA: Descobre onde estão os dados reais do produto
+        let productData = null;
+
+        if (response) {
+            // Se a API retornar os dados direto ou dentro de .data
+            productData = response.data || response;
+
+            // Caso o backend retorne um Array [ {...} ], pega o primeiro item
+            if (Array.isArray(productData)) {
+                productData = productData[0];
+            }
+        }
+
+        if (!productData || Object.keys(productData).length === 0) {
+            toast('error', 'Erro', 'Os dados do produto não foram localizados pelo sistema.');
             return;
         }
 
-        // Passa os dados para o cache temporário
+        // 2. PERSISTÊNCIA LIMPA: Passa as chaves diretas para o cache temporário
         await api.temp.set('product:edit', {
             action: 'e',
-            ...product
+            id: productData.id,
+            alimentos: productData.alimentos || '',
+            refeicoes: productData.refeicoes || '',
+            refeicao_itens: productData.refeicao_itens || '',
+            preco_compra: productData.preco_compra ?? '',
+            total_imposto: productData.total_imposto ?? '',
+            margem_lucro: productData.margem_lucro ?? '',
+            custo_operacional: productData.custo_operacional ?? '',
+            preco_venda: productData.preco_venda ?? '',
+            descricao: productData.descricao || '',
+            ativo: productData.ativo
         });
 
-        // Abre a modal mapeada na rota 'pages/product'
-        api.window.openModal('pages/product', {
-            width: 900,
-            height: 600,
-            title: 'Editar Produto'
-        });
+        // 3. ABRE A JANELA (Corrigido: Removido a duplicidade do openModal que estava fora do timeout)
+        setTimeout(() => {
+            api.window.openModal('pages/product', {
+                width: 900,
+                height: 600,
+                title: 'Editar Produto'
+            });
+        }, 100);
 
     } catch (err) {
-        toast('error', 'Falha', 'Erro: ' + err.message);
+        console.error("Erro detalhado ao editar produto:", err);
+        toast('error', 'Falha', 'Erro ao carregar dados para edição: ' + err.message);
     }
 }
 

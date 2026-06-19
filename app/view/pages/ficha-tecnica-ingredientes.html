@@ -1,0 +1,105 @@
+{% extends "layouts/main.html" %}
+
+{% block title %}Ingredientes da Ficha Técnica{% endblock %}
+
+{% block content %}
+
+<input type="hidden" id="ficha_id">
+
+<div class="row mb-3">
+    <div class="col-12">
+        <h2 id="titulo">
+            Ingredientes da Ficha Técnica
+        </h2>
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-body">
+
+        <div class="row">
+
+            <div class="col-md-5">
+                <div class="form-floating">
+                    <select class="form-select" id="ingrediente_id">
+                        <option value="">
+                            Selecione o produto...
+                        </option>
+                    </select>
+                    <label>Produto</label>
+                </div>
+            </div>
+
+            <div class="col-md-2">
+                <div class="form-floating">
+                    <input type="number" class="form-control" id="quantidade" step="0.001">
+                    <label>Quantidade</label>
+                </div>
+            </div>
+
+            <div class="col-md-2">
+                <div class="form-floating">
+                    <input type="text" class="form-control" id="unidade">
+                    <label>Unidade</label>
+                </div>
+            </div>
+
+            <div class="col-md-3 d-grid">
+                <button type="button" class="btn btn-success" id="btn-add">
+                    <i class="fa-solid fa-plus"></i>
+                    Adicionar
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<div class="card">
+
+    <div class="card-header">
+        Ingredientes Vinculados
+    </div>
+
+    <div class="card-body">
+
+        <div class="table-responsive">
+
+            <table class="table table-bordered">
+
+                <thead>
+                    <tr>
+                        <th>Produto</th>
+                        <th>Quantidade</th>
+                        <th>Unidade</th>
+                        <th width="120">Ações</th>
+                    </tr>
+                </thead>
+
+                <tbody id="tbody-ingredientes">
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div class="mt-3 text-end">
+
+    <button type="button" class="btn btn-primary" id="btn-salvar">
+        <i class="fa-solid fa-floppy-disk"></i>
+        Salvar Ingredientes
+    </button>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script defer type="module" src="file:///{{ assets }}/js/ficha-tecnica-ingredientes.js"></script>
+{% endblock %}

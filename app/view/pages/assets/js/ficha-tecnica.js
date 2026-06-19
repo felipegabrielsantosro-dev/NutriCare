@@ -1,9 +1,24 @@
+let ajusteNutricional = {
+    calorias: null,
+    carboidratos: null,
+    acucar: null,
+    proteinas: null,
+    gorduras: null,
+    fibras: null,
+    sodio: null
+};
+
 // Vetores globais para controle em memória
 let itensFicha = [];
-let listaDeProdutosGlobais = [];
+let listaDeProdutosGlobais = []; // Matérias-Primas (Ingredientes)
+let listaDeProdutosFinais = [];  // Produtos finais (Pratos/Venda)
+let indexEdicaoItem = null;
 
-// Elementos do DOM mapeados
-const selectProduto = document.getElementById('produto_id');
+// =========================================================================
+// MAPEAMENTO DOS ELEMENTOS DO DOM (Sincronizados com o seu novo HTML)
+// =========================================================================
+const selectProdutoAlvo = document.getElementById('product_id');      // ID correto do HTML para o Produto Final
+const selectMateriaPrima = document.getElementById('refeicao_itens');  // ID correto do HTML para a Matéria-Prima
 const inputUnidade = document.getElementById('unidade');
 const inputQuantidade = document.getElementById('quantidade');
 const btnAddItem = document.getElementById('add-item');
@@ -11,101 +26,103 @@ const tableBody = document.querySelector('#table-itens tbody');
 const inputRendimento = document.getElementById('rendimento');
 const inputPesoFinal = document.getElementById('peso_final');
 
-// Elementos de Resumo/Totais da Receita
+// Elementos de Resumo
 const elQtdItens = document.getElementById('qtd-itens');
 const elPesoTotalReceita = document.getElementById('peso-total-receita');
 const elCustoTotalReceita = document.getElementById('custo-total-receita');
 const elCustoPorcao = document.getElementById('custo-porcao');
 
-// Elementos da Tabela Nutricional da Receita
-const totalCalorias = document.getElementById('total_calorias');
-const totalProteinas = document.getElementById('total_proteinas');
-const totalCarboidratos = document.getElementById('total_carboidratos');
-const totalGorduras = document.getElementById('total_gorduras');
-const totalFibras = document.getElementById('total_fibras');
-const totalSodio = document.getElementById('total_sodio');
-const totalAcucar = document.getElementById('total_acucar');
-
 const btnSalvar = document.getElementById('insert');
+const modalNutriente = new bootstrap.Modal(document.getElementById('modalNutriente'));
 
 // =========================================================================
 // FUNÇÕES DE CONVERSÃO MATEMÁTICA
 // =========================================================================
-
-// Converte qualquer entrada para Quilogramas (kg) ou Litros (L)
 function converterParaQuilos(quantidade, unidade) {
-    const uni = unidade.toLowerCase().trim();
+    const uni = unidade ? unidade.toLowerCase().trim() : '';
     if (uni === 'g' || uni === 'ml') return quantidade / 1000;
     if (uni === 'mg') return quantidade / 1000000;
-    return quantidade; // kg, l, un
-}
-
-// Clona o cálculo com base na tabela nutricional padrão (100g ou 100ml)
-function obterFatorNutricional(quantidade, unidade) {
-    const uni = unidade.toLowerCase().trim();
-    let emGramasOuMl = quantidade;
-
-    if (uni === 'kg' || uni === 'l') emGramasOuMl = quantidade * 1000;
-    if (uni === 'mg') emGramasOuMl = quantidade / 1000;
-
-    return emGramasOuMl / 100; // Fator multiplicador sobre a base de 100g
+    return quantidade;
 }
 
 // =========================================================================
-// 1. CARREGAR PRODUTOS NO SELECT
+// 1. CARREGAR SELECT DE PRODUTOS FINAIS (CORRIGIDO VIA api.product)
 // =========================================================================
-async function carregarProdutosNoSelect() {
+async function carregarProdutosFinaisNoSelect() {
     try {
+        // Usando 'api.product' no singular, que é a rota oficial do seu sistema
+        if (typeof api.product === 'undefined' || typeof api.product.find !== 'function') {
+            console.warn("A rota api.product não foi encontrada.");
+            selectProdutoAlvo.innerHTML = '<option value="">Erro: API não configurada</option>';
+            return;
+        }
+
         const response = await api.product.find({ limit: 150, offset: 0 });
-        // Garante a extração correta independente da paginação da api
+        listaDeProdutosFinais = response.data || response || [];
+
+        selectProdutoAlvo.innerHTML = '<option value="" selected disabled>Selecione o Produto Alvo...</option>';
+
+        if (listaDeProdutosFinais.length === 0) {
+            selectProdutoAlvo.innerHTML = '<option value="">Nenhum produto cadastrado</option>';
+            return;
+        }
+
+        listaDeProdutosFinais.forEach(prod => {
+            const option = document.createElement('option');
+            option.value = prod.id;
+
+            // Sincroniza com as colunas do seu banco: tenta 'refeicoes', depois 'alimentos', 'nome' ou 'descricao'
+            option.textContent = prod.refeicoes ||
+                prod.alimentos ||
+                prod.nome ||
+                prod.descricao ||
+                `Produto #${prod.id}`;
+
+            selectProdutoAlvo.appendChild(option);
+        });
+
+    } catch (error) {
+        console.error("Erro ao popular select de produtos alvo:", error);
+        selectProdutoAlvo.innerHTML = '<option value="">Erro ao carregar produtos</option>';
+    }
+}
+
+// Carrega os ingredientes/matérias-primas no select #refeicao_itens
+async function carregarMateriasPrimasNoSelect() {
+    try {
+        if (typeof api.materiaPrima === 'undefined' || typeof api.materiaPrima.find !== 'function') {
+            selectMateriaPrima.innerHTML = '<option value="">Objeto api.materiaPrima não encontrado</option>';
+            return;
+        }
+
+        const response = await api.materiaPrima.find({ limit: 150, offset: 0 });
         listaDeProdutosGlobais = response.data || response || [];
 
-        selectProduto.innerHTML = '<option value="">Selecione um produto...</option>';
+        selectMateriaPrima.innerHTML = '<option value="" selected disabled>Selecione o Ingrediente...</option>';
 
         listaDeProdutosGlobais.forEach(prod => {
             const option = document.createElement('option');
             option.value = prod.id;
-            option.textContent = prod.alimentos || prod.refeicoes || prod.nome || `Produto #${prod.id}`;
-            selectProduto.appendChild(option);
+            option.textContent = prod.nome || `Insumo #${prod.id}`;
+            selectMateriaPrima.appendChild(option);
         });
     } catch (error) {
-        console.error("Erro ao popular o select de produtos:", error);
-        selectProduto.innerHTML = '<option value="">Erro ao carregar produtos</option>';
+        console.error("Erro ao popular o select de matérias-primas:", error);
+        selectMateriaPrima.innerHTML = '<option value="">Erro ao carregar matérias-primas</option>';
     }
 }
 
 // =========================================================================
-// 2. CÁLCULO DINÂMICO DOS TOTAIS DA RECEITA (VERSÃO BLINDADA)
+// 2. CÁLCULO DINÂMICO DOS TOTAIS DA RECEITA
 // =========================================================================
 function calcularCustosFNutricional() {
     let custoTotalAcumulado = 0;
     let pesoTotalBruto = 0;
 
-    let nutCalorias = 0;
-    let nutCarboidratos = 0;
-    let nutAcucar = 0;
-    let nutProteinas = 0;
-    let nutGorduras = 0;
-    let nutFibras = 0;
-    let nutSodio = 0;
-
-    // 1. Percorre os itens e soma os valores ponderados
     itensFicha.forEach(item => {
         custoTotalAcumulado += item.total;
         pesoTotalBruto += converterParaQuilos(item.quantidade, item.unidade);
-
-        // Soma calculada multiplicando o valor base (100g) pelo fator da quantidade
-        nutCalorias += (item.nutrientesBase.calorias * item.fatorNutricional);
-        nutCarboidratos += (item.nutrientesBase.carboidratos * item.fatorNutricional);
-        nutAcucar += (item.nutrientesBase.acucar * item.fatorNutricional);
-        nutProteinas += (item.nutrientesBase.proteinas * item.fatorNutricional);
-        nutGorduras += (item.nutrientesBase.gorduras * item.fatorNutricional);
-        nutFibras += (item.nutrientesBase.fibras * item.fatorNutricional);
-        nutSodio += (item.nutrientesBase.sodio * item.fatorNutricional);
     });
-
-    // Diagnóstico no Console (Aperte F12 no navegador para checar se os números saíram do zero aqui)
-    console.log("Valores Calculados internamente:", { nutCalorias, nutProteinas, nutCarboidratos });
 
     const rendimento = parseFloat(inputRendimento.value) || 1;
     const custoUnitario = custoTotalAcumulado / (rendimento > 0 ? rendimento : 1);
@@ -113,60 +130,45 @@ function calcularCustosFNutricional() {
     const pesoFinalDigitado = parseFloat(inputPesoFinal.value);
     const pesoExibicao = !isNaN(pesoFinalDigitado) && pesoFinalDigitado > 0 ? pesoFinalDigitado : pesoTotalBruto;
 
-    // Atualiza o bloco "Resumo da Receita"
     if (elQtdItens) elQtdItens.textContent = itensFicha.length;
     if (elPesoTotalReceita) elPesoTotalReceita.textContent = `${pesoExibicao.toFixed(3)} kg`;
     if (elCustoTotalReceita) elCustoTotalReceita.textContent = `R$ ${custoTotalAcumulado.toFixed(2)}`;
     if (elCustoPorcao) elCustoPorcao.textContent = `R$ ${custoUnitario.toFixed(2)}`;
-
-    // 2. ATUALIZAÇÃO BLINDADA: Tenta pelo ID, se falhar, busca pela posição na tabela
-    const atualizarCampo = (elemento, idAlternativo, sufixo, valor) => {
-        const el = elemento || document.getElementById(idAlternativo);
-        if (el) {
-            el.textContent = `${valor.toFixed(1)} ${sufixo}`;
-        }
-    };
-
-    atualizarCampo(totalCalorias, 'total_calorias', 'kcal', nutCalorias);
-    atualizarCampo(totalProteinas, 'total_proteinas', 'g', nutProteinas);
-    atualizarCampo(totalCarboidratos, 'total_carboidratos', 'g', nutCarboidratos);
-    atualizarCampo(totalGorduras, 'total_gorduras', 'g', nutGorduras);
-    atualizarCampo(totalFibras, 'total_fibras', 'g', nutFibras);
-    atualizarCampo(totalSodio, 'total_sodio', 'mg', nutSodio);
-    atualizarCampo(totalAcucar, 'total_acucar', 'g', nutAcucar);
-
-    // 3. Força bruta caso os seletores acima falhem (Injeta direto pelas posições das colunas da tabela)
-    const tabelaNutricional = document.querySelector('h5 + .table-responsive .table tbody tr');
-    if (tabelaNutricional && tabelaNutricional.children.length >= 7) {
-        tabelaNutricional.children[0].textContent = `${nutCalorias.toFixed(1)} kcal`;
-        tabelaNutricional.children[1].textContent = `${nutProteinas.toFixed(1)} g`;
-        tabelaNutricional.children[2].textContent = `${nutCarboidratos.toFixed(1)} g`;
-        tabelaNutricional.children[3].textContent = `${nutGorduras.toFixed(1)} g`;
-        tabelaNutricional.children[4].textContent = `${nutFibras.toFixed(1)} g`;
-        tabelaNutricional.children[5].textContent = `${nutSodio.toFixed(1)} mg`;
-        tabelaNutricional.children[6].textContent = `${nutAcucar.toFixed(1)} g`;
-    }
 }
 
-// Observadores para mudança de estado em tempo de execução
 inputRendimento.addEventListener('input', calcularCustosFNutricional);
 inputPesoFinal.addEventListener('input', calcularCustosFNutricional);
 
 // =========================================================================
-// 3. EVENTOS DA TABELA DE PRODUTOS/INSUMOS
+// 3. EVENTOS E RENDERIZAÇÃO DA LISTA DE PRODUTOS/INGREDIENTES
 // =========================================================================
 function renderizarTabelaItens() {
     tableBody.innerHTML = '';
 
+    if (itensFicha.length === 0) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="7" class="text-center text-muted py-3">
+                    Nenhum produto ou ingrediente adicionado à lista.
+                </td>
+            </tr>`;
+        calcularCustosFNutricional();
+        return;
+    }
+
     itensFicha.forEach((item, index) => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
+            <td><strong>${item.produto_alvo_nome}</strong></td>
             <td>${item.nome}</td>
             <td>${item.quantidade}</td>
             <td>${item.unidade}</td>
             <td>R$ ${item.precoUnitario.toFixed(2)}</td>
             <td>R$ ${item.total.toFixed(2)}</td>
             <td class="text-center">
+                <button type="button" class="btn btn-warning btn-sm me-1" onclick="editarItemFicha(${index})">
+                    <i class="fa-solid fa-pen"></i>
+                </button>
                 <button type="button" class="btn btn-danger btn-sm" onclick="removerItemFicha(${index})">
                     <i class="fa-solid fa-trash"></i>
                 </button>
@@ -178,72 +180,100 @@ function renderizarTabelaItens() {
     calcularCustosFNutricional();
 }
 
-btnAddItem.addEventListener('click', () => {
-    const produtoId = selectProduto.value;
+btnAddItem.addEventListener('click', async () => {
+    const produtoAlvoId = selectProdutoAlvo.value;
+    const materiaPrimaId = selectMateriaPrima.value;
     const unidade = inputUnidade.value.trim();
     const quantidade = parseFloat(inputQuantidade.value) || 0;
 
-    if (!produtoId || !unidade || quantidade <= 0) {
-        toast('error', 'Atenção', 'Selecione o produto, a unidade e defina uma quantidade válida.');
+    if (!produtoAlvoId) {
+        toast('error', 'Atenção', 'Selecione o Produto/Prato Final que receberá este ingrediente.');
         return;
     }
 
-    const produtoOriginal = listaDeProdutosGlobais.find(p => p.id == produtoId);
-    const nomeProduto = produtoOriginal ? (produtoOriginal.alimentos || produtoOriginal.refeicoes || produtoOriginal.nome) : 'Desconhecido';
-
-    const precoCompraTabela = parseFloat(produtoOriginal?.preco_compra || produtoOriginal?.preco) || 0;
-    let precoUnitarioCalculado = precoCompraTabela;
-
-    // Tratamento de conversão financeira proporcional
-    const uniBaixa = unidade.toLowerCase();
-    if (uniBaixa === 'g' || uniBaixa === 'ml') {
-        precoUnitarioCalculado = precoCompraTabela / 1000;
-    } else if (uniBaixa === 'mg') {
-        precoUnitarioCalculado = precoCompraTabela / 1000000;
+    if (!materiaPrimaId || materiaPrimaId === "refeicao_itens" || !unidade || quantidade <= 0) {
+        toast('error', 'Atenção', 'Selecione um ingrediente válido, defina a unidade de medida e a quantidade.');
+        return;
     }
 
-    const totalItem = precoUnitarioCalculado * quantidade;
-    const fatorNutricional = obterFatorNutricional(quantidade, unidade);
+    try {
+        const response = await api.materiaPrima.findById(materiaPrimaId);
+        const produtoOriginal = response.data || response;
 
-    // Mapeamento tolerante a variações comuns de nomenclatura em bancos de dados (Back-end)
-    itensFicha.push({
-        produto_id: parseInt(produtoId),
-        nome: nomeProduto,
-        quantidade: quantidade,
-        unidade: unidade,
-        precoUnitario: precoUnitarioCalculado,
-        total: totalItem,
-        fatorNutricional: fatorNutricional,
-        nutrientesBase: {
-            calorias: parseFloat(produtoOriginal?.valor_energetico || produtoOriginal?.calorias || produtoOriginal?.energia) || 0,
-            carboidratos: parseFloat(produtoOriginal?.carboidratos || produtoOriginal?.carboidrato) || 0,
-            acucar: parseFloat(produtoOriginal?.acucares_totais || produtoOriginal?.acucar || produtoOriginal?.acucares) || 0,
-            proteinas: parseFloat(produtoOriginal?.proteinas || produtoOriginal?.proteina) || 0,
-            gorduras: parseFloat(produtoOriginal?.gorduras_totais || produtoOriginal?.gorduras || produtoOriginal?.gordura) || 0,
-            fibras: parseFloat(produtoOriginal?.fibra_alimentar || produtoOriginal?.fibra || produtoOriginal?.fibras) || 0,
-            sodio: parseFloat(produtoOriginal?.sodio || produtoOriginal?.sal) || 0
+        const nomeMateriaPrima = produtoOriginal?.nome || `Insumo #${materiaPrimaId}`;
+        const precoCompraTabela = parseFloat(produtoOriginal?.preco_compra || 0);
+
+        const nomeProdutoAlvo = selectProdutoAlvo.options[selectProdutoAlvo.selectedIndex].text;
+
+        let precoUnitarioCalculado = precoCompraTabela;
+        const uniBaixa = unidade.toLowerCase();
+
+        if (uniBaixa === 'g' || uniBaixa === 'ml') {
+            precoUnitarioCalculado = precoCompraTabela / 1000;
+        } else if (uniBaixa === 'mg') {
+            precoUnitarioCalculado = precoCompraTabela / 1000000;
         }
-    });
 
-    // Reseta o painel de inserção rápida
-    selectProduto.value = '';
-    inputUnidade.value = '';
-    inputQuantidade.value = '';
-    document.getElementById('produto-info').classList.add('d-none');
+        const totalItem = precoUnitarioCalculado * quantidade;
 
-    renderizarTabelaItens();
+        const itemEstruturado = {
+            produto_alvo_id: Number(produtoAlvoId),
+            produto_alvo_nome: nomeProdutoAlvo,
+            produto_id: Number(materiaPrimaId),
+            nome: nomeMateriaPrima,
+            quantidade,
+            unidade,
+            precoUnitario: precoUnitarioCalculado,
+            total: totalItem
+        };
+
+        if (indexEdicaoItem !== null) {
+            itensFicha[indexEdicaoItem] = itemEstruturado;
+            indexEdicaoItem = null;
+            btnAddItem.innerHTML = '<i class="fa-solid fa-plus"></i> Vincular';
+        } else {
+            itensFicha.push(itemEstruturado);
+        }
+
+        // Reseta campos do ingrediente
+        selectMateriaPrima.value = '';
+        inputUnidade.value = '';
+        inputQuantidade.value = '';
+
+        document.getElementById('produto-info').classList.add('d-none');
+        renderizarTabelaItens();
+
+    } catch (error) {
+        console.error(error);
+        toast('error', 'Erro', 'Não foi possível processar a inclusão do ingrediente.');
+    }
 });
 
+window.editarItemFicha = function (index) {
+    const item = itensFicha[index];
+    indexEdicaoItem = index;
+
+    selectProdutoAlvo.value = item.produto_alvo_id;
+    selectMateriaPrima.value = item.produto_id;
+    inputUnidade.value = item.unidade;
+    inputQuantidade.value = item.quantidade;
+
+    selectMateriaPrima.dispatchEvent(new Event('change'));
+    btnAddItem.innerHTML = '<i class="fa-solid fa-check"></i> Atualizar';
+};
+
 window.removerItemFicha = function (index) {
+    if (indexEdicaoItem === index) indexEdicaoItem = null;
     itensFicha.splice(index, 1);
     renderizarTabelaItens();
 };
 
 // =========================================================================
-// 4. INICIALIZAÇÃO DA PÁGINA (CREATE / EDIT)
+// 4. INICIALIZAÇÃO E PREENCHIMENTO DOS DADOS (DOM READY)
 // =========================================================================
 window.addEventListener('DOMContentLoaded', async () => {
-    await carregarProdutosNoSelect();
+    await carregarProdutosFinaisNoSelect();
+    await carregarMateriasPrimasNoSelect();
 
     const temp = await api.temp.get('ficha-tecnica:edit');
 
@@ -271,7 +301,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 });
 
 // =========================================================================
-// 5. PERSISTÊNCIA DOS DADOS (SALVAR NO BANCO)
+// 5. ENVIAR FORMULÁRIO COMPLETO (SAVE)
 // =========================================================================
 btnSalvar.addEventListener('click', async () => {
     const action = document.getElementById('action').value;
@@ -279,7 +309,7 @@ btnSalvar.addEventListener('click', async () => {
     const nome_produto = document.getElementById('nome_produto').value.trim();
 
     if (!nome_produto) {
-        toast('error', 'Validação', 'O nome do produto da ficha é obrigatório.');
+        toast('error', 'Validação', 'O nome da ficha técnica é obrigatório.');
         return;
     }
 
@@ -324,32 +354,32 @@ btnSalvar.addEventListener('click', async () => {
 });
 
 // =========================================================================
-// 6. CARD DINÂMICO DE VISUALIZAÇÃO DO PRODUTO (ON CHANGE)
+// 6. DETALHES INFORMATIVOS DA MATÉRIA-PRIMA SELECIONADA
 // =========================================================================
-selectProduto.addEventListener('change', async () => {
-    const id = selectProduto.value;
+selectMateriaPrima.addEventListener('change', async () => {
+    const id = selectMateriaPrima.value;
 
-    if (!id) {
+    if (!id || id === "refeicao_itens") {
         document.getElementById('produto-info').classList.add('d-none');
         return;
     }
 
-    const response = await api.product.findById(id);
-    const produto = response.data || response;
+    try {
+        const response = await api.materiaPrima.findById(id);
+        const produto = response.data || response;
 
-    document.getElementById('produto-info').classList.remove('d-none');
+        document.getElementById('produto-info').classList.remove('d-none');
 
-    document.getElementById('info-preco').textContent = `R$ ${Number(produto.preco_compra || 0).toFixed(2)}`;
-    document.getElementById('info-venda').textContent = `R$ ${Number(produto.preco_venda || 0).toFixed(2)}`;
-    document.getElementById('info-porcao').textContent = `${produto.peso_liquido || produto.peso_bruto || 0} kg`;
-    document.getElementById('info-porcoes').textContent = produto.rendimento || 0;
+        document.getElementById('info-preco').textContent = `R$ ${Number(produto.preco_compra || 0).toFixed(2)}`;
+        document.getElementById('info-venda').textContent = `R$ ${Number(produto.preco_venda || 0).toFixed(2)}`;
+        document.getElementById('info-porcao').textContent = `${produto.peso_liquido || produto.peso_bruto || 0} kg`;
 
-    // Tratamento preventivo para exibição no painel intermediário
-    document.getElementById('info-calorias').textContent = `${produto.valor_energetico || produto.calorias || produto.energia || 0} kcal`;
-    document.getElementById('info-proteinas').textContent = `${produto.proteinas || produto.proteina || 0} g`;
-    document.getElementById('info-carboidratos').textContent = `${produto.carboidratos || produto.carboidrato || 0} g`;
-    document.getElementById('info-gorduras').textContent = `${produto.gorduras_totais || produto.gorduras || produto.gordura || 0} g`;
-    document.getElementById('info-acucar').textContent = `${produto.acucares_totais || produto.acucar || produto.acucares || 0} g`;
-    document.getElementById('info-fibras').textContent = `${produto.fibra_alimentar || produto.fibra || produto.fibras || 0} g`;
-    document.getElementById('info-sodio').textContent = `${produto.sodio || produto.sal || 0} mg`;
+        if (produto.unidade_medida) {
+            inputUnidade.value = produto.unidade_medida;
+        }
+
+        document.getElementById('info-porcoes').textContent = "1";
+    } catch (e) {
+        console.error("Erro ao carregar detalhes do insumo:", e);
+    }
 });

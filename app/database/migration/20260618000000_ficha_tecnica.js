@@ -28,13 +28,26 @@ exports.up = async function (knex) {
             .unsigned()
             .notNullable()
             .references('id')
-            .inTable('products')
+            .inTable('products') // Garanta que o nome da sua tabela de produtos seja 'products' mesmo
             .onDelete('CASCADE');
 
         table.decimal('quantidade', 10, 3).defaultTo(0);
         table.string('unidade', 20);
         table.decimal('preco_unitario', 10, 2).defaultTo(0);
         table.decimal('valor_total', 10, 2).defaultTo(0);
+
+        // =========================================================================
+        // NOVOS CAMPOS: Salva a informação nutricional customizada deste item
+        // =========================================================================
+        table.decimal('calorias', 10, 2).defaultTo(0);
+        table.decimal('carboidratos', 10, 2).defaultTo(0);
+        table.decimal('acucar', 10, 2).defaultTo(0);
+        table.decimal('proteinas', 10, 2).defaultTo(0);
+        table.decimal('gorduras', 10, 2).defaultTo(0);
+        table.decimal('fibras', 10, 2).defaultTo(0);
+        table.decimal('sodio', 10, 2).defaultTo(0);
+        // =========================================================================
+
         table.timestamp('data_criacao').defaultTo(knex.fn.now());
     });
 };

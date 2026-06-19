@@ -94,8 +94,38 @@ contextBridge.exposeInMainWorld('api', {
             ipcRenderer.invoke('ficha-tecnica:find', filter),
 
         findById: (id) =>
-            ipcRenderer.invoke('ficha-tecnica:findById', id)
-    }
+            ipcRenderer.invoke('ficha-tecnica:findById', id),
+
+        onReload: (callback) =>
+            ipcRenderer.on('ficha-tecnica:reload', (_event, value) => callback(value))
+    },
+
+    fichaTecnicaIngredientes: {
+
+        insert: (data) =>
+            ipcRenderer.invoke(
+                'ficha-tecnica-ingredientes:insert',
+                data
+            ),
+
+        delete: (id) =>
+            ipcRenderer.invoke(
+                'ficha-tecnica-ingredientes:delete',
+                id
+            ),
+
+        findByFichaId: (fichaId) =>
+            ipcRenderer.invoke(
+                'ficha-tecnica-ingredientes:findByFichaId',
+                fichaId
+            ),
+
+        onReload: (callback) =>
+            ipcRenderer.on(
+                'ficha-tecnica-ingredientes:reload',
+                (_event, value) => callback(value)
+            )
+    },
 
 });
 

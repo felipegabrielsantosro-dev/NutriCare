@@ -230,3 +230,40 @@ ipcMain.handle('ficha-tecnica:delete', async (_e, id) => {
     if (result.status) broadcastReload('ficha-tecnica:reload');
     return result;
 });
+
+// =========================================================================
+// RETORNADO: COMPLEMENTO PARA GERENCIAMENTO DE INGREDIENTES DA FICHA
+// =========================================================================
+
+// Insere ou vincula um ingrediente/insumo a uma ficha técnica
+ipcMain.handle('ficha-tecnica-ingredientes:insert', async (_e, data) => {
+    // Exemplo de chamada ao seu Model (ajuste o nome se a classe for diferente, ex: FichaTecnicaIngrediente)
+    const result = await FichaTecnica.insertIngrediente ? await FichaTecnica.insertIngrediente(data) : { status: false, msg: 'Método não implementado' };
+
+    // Dispara o recarregamento na tela de gerenciamento se necessário
+    if (result.status) {
+        broadcastReload('ficha-tecnica:reload');
+        broadcastReload('ficha-tecnica-ingredientes:reload');
+    }
+    return result;
+});
+
+// Remove um ingrediente específico de uma ficha técnica
+ipcMain.handle('ficha-tecnica-ingredientes:delete', async (_e, id) => {
+    const result = await FichaTecnica.deleteIngrediente ? await FichaTecnica.deleteIngrediente(id) : { status: false, msg: 'Método não implementado' };
+
+    if (result.status) {
+        broadcastReload('ficha-tecnica:reload');
+        broadcastReload('ficha-tecnica-ingredientes:reload');
+    }
+    return result;
+});
+
+// Lista todos os ingredientes vinculados a um ID de ficha técnica específico
+ipcMain.handle('ficha-tecnica-ingredientes:findByFichaId', async (_e, fichaId) => {
+    if (FichaTecnica.findIngredientesByFichaId) {
+        return await FichaTecnica.findIngredientesByFichaId(fichaId);
+    }
+    // Fallback caso sua busca use o find genérico com filtro
+    return await FichaTecnica.find({ ficha_tecnica_id: fichaId });
+});
