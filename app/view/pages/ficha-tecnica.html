@@ -15,7 +15,6 @@
     <input type="hidden" id="id" name="id">
     <input type="hidden" id="action" name="action">
 
-    <!-- DADOS DA RECEITA -->
     <div class="card shadow-sm mb-4">
         <div class="card-header bg-primary text-white">
             <h5 class="mb-0">
@@ -25,9 +24,7 @@
         </div>
 
         <div class="card-body">
-
             <div class="row">
-
                 <div class="col-md-8">
                     <div class="form-floating mb-3">
                         <input type="text" class="form-control" id="nome_produto" name="nome_produto">
@@ -41,21 +38,21 @@
                         <label>Categoria</label>
                     </div>
                 </div>
-
             </div>
 
             <div class="row align-items-center">
-
                 <div class="col-md-4">
                     <div class="form-floating mb-3">
-                        <input type="number" class="form-control" id="rendimento" name="rendimento" value="1">
+                        <input type="number" class="form-control" id="rendimento" name="rendimento" value="1"
+                            oninput="calcularCustosFNutricional()">
                         <label>Rendimento (Porções/Unidades)</label>
                     </div>
                 </div>
 
                 <div class="col-md-4">
                     <div class="form-floating mb-3">
-                        <input type="number" step="0.001" class="form-control" id="peso_final" name="peso_final">
+                        <input type="number" step="0.001" class="form-control" id="peso_final" name="peso_final"
+                            oninput="calcularCustosFNutricional()">
                         <label>Peso Final Total (kg)</label>
                     </div>
                 </div>
@@ -68,221 +65,191 @@
                         </label>
                     </div>
                 </div>
-
             </div>
-
         </div>
     </div>
 
-    <!-- PRODUTO FINAL -->
     <div class="card shadow-sm mb-4">
-
-        <div class="card-header bg-success text-white">
-            <h5 class="mb-0">
-                <i class="fa-solid fa-link me-2"></i>
-                Produto Final e Ingredientes
-            </h5>
+        <div class="card-header bg-secondary text-white">
+            <h5 class="mb-0"><i class="fa-solid fa-list-check me-2"></i> Adicionar Itens e Ingredientes</h5>
         </div>
-
         <div class="card-body">
-
-            <p class="text-muted">
-                Selecione o produto final e adicione os ingredientes da receita.
-            </p>
-
-            <div class="row g-2">
-
+            <div class="row g-2 mb-3">
                 <div class="col-md-4">
-                    <div class="form-floating">
-                        <select class="form-select" id="product_id" name="product_id">
-                            <option value="" selected disabled>
-                                Selecione o Produto Alvo...
-                            </option>
-                        </select>
-                        <label>Produto / Prato Final</label>
-                    </div>
+                    <label class="form-label small fw-bold">Produto Alvo (Venda)</label>
+                    <select class="form-select" id="product_id"></select>
                 </div>
-
-                <div class="col-md-2">
-                    <div class="form-floating">
-                        <input type="text" class="form-control" id="unidade" placeholder="KG">
-                        <label>Unidade</label>
-                    </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold">Matéria-Prima (Ingrediente)</label>
+                    <select class="form-select" id="refeicao_itens"></select>
                 </div>
-
                 <div class="col-md-2">
-                    <div class="form-floating">
-                        <input type="number" step="0.001" min="0" class="form-control" id="quantidade">
-                        <label>Quantidade</label>
-                    </div>
+                    <label class="form-label small fw-bold">Unidade</label>
+                    <input type="text" class="form-control" id="unidade" placeholder="Ex: g, kg, ml">
                 </div>
-
                 <div class="col-md-2">
-                    <button type="button" class="btn btn-primary w-100 h-100" id="add-item">
-                        <i class="fa-solid fa-plus me-1"></i>
-                        Vincular
+                    <label class="form-label small fw-bold">Quantidade</label>
+                    <input type="number" step="0.001" class="form-control" id="quantidade">
+                </div>
+                <div class="col-md-1 d-flex align-items-end">
+                    <button type="button" class="btn btn-primary w-100" id="add-item">
+                        <i class="fa-solid fa-plus"></i>
                     </button>
                 </div>
-
             </div>
 
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped align-middle mb-0" id="table-itens">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Produto Alvo</th>
+                            <th>Ingrediente</th>
+                            <th>Qtd</th>
+                            <th>Unidade</th>
+                            <th>Preço Un.</th>
+                            <th>Total</th>
+                            <th class="text-center" style="width: 100px;">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
         </div>
-
     </div>
 
-    <!-- INFORMAÇÕES DO PRODUTO -->
     <div class="card shadow-sm mb-4 d-none" id="produto-info">
-
         <div class="card-header bg-info text-white">
             <h5 class="mb-0">
                 <i class="fa-solid fa-box me-2"></i>
                 Dados da Matéria-Prima Selecionada
             </h5>
         </div>
-
         <div class="card-body">
-
             <div class="row g-3">
-
                 <div class="col-md-3">
-                    <div class="border rounded p-3 text-center h-100">
+                    <div class="border rounded p-3 text-center">
                         <small class="text-muted">Preço Compra</small>
-                        <h5 id="info-preco" class="mt-2 mb-0">R$ 0,00</h5>
+                        <h5 id="info-preco">R$ 0,00</h5>
                     </div>
                 </div>
-
                 <div class="col-md-3">
-                    <div class="border rounded p-3 text-center h-100">
+                    <div class="border rounded p-3 text-center">
                         <small class="text-muted">Preço Venda</small>
-                        <h5 id="info-venda" class="mt-2 mb-0">R$ 0,00</h5>
+                        <h5 id="info-venda">R$ 0,00</h5>
                     </div>
                 </div>
-
                 <div class="col-md-3">
-                    <div class="border rounded p-3 text-center h-100">
+                    <div class="border rounded p-3 text-center">
                         <small class="text-muted">Porção Base</small>
-                        <h5 id="info-porcao" class="mt-2 mb-0">0 g</h5>
+                        <h5 id="info-porcao">0 g</h5>
                     </div>
                 </div>
-
                 <div class="col-md-3">
-                    <div class="border rounded p-3 text-center h-100">
+                    <div class="border rounded p-3 text-center">
                         <small class="text-muted">Porções Embalagem</small>
-                        <h5 id="info-porcoes" class="mt-2 mb-0">0</h5>
+                        <h5 id="info-porcoes">0</h5>
                     </div>
                 </div>
-
             </div>
-
-            <div class="d-none">
-                <span id="info-calorias">0 kcal</span>
-                <span id="info-proteinas">0 g</span>
-                <span id="info-carboidratos">0 g</span>
-                <span id="info-gorduras">0 g</span>
-                <span id="info-acucar">0 g</span>
-                <span id="info-fibras">0 g</span>
-                <span id="info-sodio">0 mg</span>
-
-                <span id="total_calorias"></span>
-                <span id="total_proteinas"></span>
-                <span id="total_carboidratos"></span>
-                <span id="total_gorduras"></span>
-                <span id="total_fibras"></span>
-                <span id="total_sodio"></span>
-                <span id="total_acucar"></span>
-            </div>
-
         </div>
-
     </div>
 
-    <!-- RESUMO -->
     <div class="card shadow-sm mb-4">
-
         <div class="card-header bg-warning">
             <h5 class="mb-0">
                 <i class="fa-solid fa-chart-line me-2"></i>
-                Resumo Geral da Receita
+                Resumo e Formação de Preço
             </h5>
         </div>
 
         <div class="card-body">
-
             <div class="row g-3 text-center">
-
                 <div class="col-md-3">
                     <div class="border rounded p-3">
                         <small class="text-muted">Total de Itens</small>
-                        <h4 id="qtd-itens" class="fw-bold mb-0">0</h4>
+                        <h4 id="qtd-itens" class="fw-bold">0</h4>
                     </div>
                 </div>
 
                 <div class="col-md-3">
                     <div class="border rounded p-3">
                         <small class="text-muted">Peso Total</small>
-                        <h4 id="peso-total-receita" class="fw-bold mb-0">0.000 kg</h4>
+                        <h4 id="peso-total-receita" class="fw-bold">0.000 kg</h4>
                     </div>
                 </div>
 
                 <div class="col-md-3">
                     <div class="border rounded p-3">
-                        <small class="text-muted">Custo Total</small>
-                        <h4 id="custo-total-receita" class="fw-bold text-success mb-0">
-                            R$ 0,00
-                        </h4>
+                        <small class="text-muted">Ingredientes</small>
+                        <h4 id="custo-total-receita" class="fw-bold text-primary">R$ 0,00</h4>
+                        <span id="valor-ingredientes" class="d-none">R$ 0,00</span>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="border rounded p-3">
+                        <small class="text-muted">Tempo de Preparo (min)</small>
+                        <input type="number" id="tempo_preparo" class="form-control mt-2 text-center" min="0" value="30"
+                            oninput="calcularCustosFNutricional()">
+                    </div>
+                </div>
+            </div>
+
+            <hr>
+
+            <div class="row g-3 text-center">
+                <div class="col-md-3">
+                    <div class="border rounded p-3">
+                        <small class="text-muted">Mão de Obra</small>
+                        <h4 id="valor-mao-obra" class="fw-bold text-secondary">R$ 0,00</h4>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="border rounded p-3">
+                        <small class="text-muted">Taxa 15%</small>
+                        <h4 id="valor-percentual" class="fw-bold text-warning">R$ 0,00</h4>
                     </div>
                 </div>
 
                 <div class="col-md-3">
                     <div class="border rounded p-3">
                         <small class="text-muted">Custo por Porção</small>
-                        <h4 id="custo-porcao" class="fw-bold text-success mb-0">
-                            R$ 0,00
-                        </h4>
+                        <h4 id="custo-porcao" class="fw-bold text-info">R$ 0,00</h4>
                     </div>
                 </div>
 
+                <div class="col-md-3">
+                    <div class="border rounded p-3 bg-light">
+                        <small class="text-muted">Preço de Venda</small>
+                        <h3 id="preco-venda-final" class="fw-bold text-success">R$ 0,00</h3>
+                    </div>
+                </div>
             </div>
-
         </div>
-
     </div>
 
-    <!-- OBSERVAÇÕES -->
     <div class="card shadow-sm mb-4">
-
         <div class="card-header">
             <h5 class="mb-0">
                 <i class="fa-solid fa-clipboard-list me-2"></i>
                 Observações e Modo de Preparo
             </h5>
         </div>
-
         <div class="card-body">
-
             <div class="form-floating">
-                <textarea class="form-control" id="observacao" name="observacao" style="height: 150px"
-                    placeholder="Modo de preparo..."></textarea>
-
-                <label>
-                    Observações Gerais / Instruções de Preparo
-                </label>
+                <textarea class="form-control" id="observacao" name="observacao" style="height:150px"></textarea>
+                <label>Observações Gerais / Instruções de Preparo</label>
             </div>
-
         </div>
-
     </div>
 
-    <!-- BOTÃO -->
     <div class="text-center mb-5">
-
         <button type="button" class="btn btn-success btn-lg px-5" id="insert">
-
             <i class="fa-solid fa-floppy-disk me-2"></i>
             Salvar Ficha Técnica
-
         </button>
-
     </div>
 
 </form>

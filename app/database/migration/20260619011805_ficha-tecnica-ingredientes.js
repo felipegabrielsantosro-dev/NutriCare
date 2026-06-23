@@ -1,53 +1,45 @@
-exports.up = async function (knex) {
+// Remova o import do Connection se ele não for usado aqui. O Knex já te passa a instância 'knex' automaticamente.
 
-    await knex.schema.createTable(
-        'ficha_tecnica_ingredientes',
-        table => {
+export async function up(knex) {
+    await knex.schema.createTable('ficha_tecnica_ingredientes', table => {
+        table.increments('id');
 
-            table.increments('id');
+        table
+            .integer('ficha_tecnica_id')
+            .unsigned()
+            .notNullable();
 
-            table
-                .integer('ficha_tecnica_id')
-                .unsigned()
-                .notNullable();
+        table
+            .integer('produto_id')
+            .unsigned()
+            .notNullable();
 
-            table
-                .integer('produto_id')
-                .unsigned()
-                .notNullable();
+        table
+            .decimal('quantidade', 10, 3)
+            .defaultTo(0);
 
-            table
-                .decimal('quantidade', 10, 3)
-                .defaultTo(0);
+        table
+            .string('unidade', 20);
 
-            table
-                .string('unidade', 20);
+        table.boolean('ativo')
+            .defaultTo(true);
 
-            table.boolean('ativo')
-                .defaultTo(true);
+        table.timestamps(true, true);
 
-            table.timestamps(true, true);
+        table
+            .foreign('ficha_tecnica_id')
+            .references('id')
+            .inTable('ficha_tecnica')
+            .onDelete('CASCADE');
 
-            table
-                .foreign('ficha_tecnica_id')
-                .references('id')
-                .inTable('ficha_tecnica')
-                .onDelete('CASCADE');
+        table
+            .foreign('produto_id')
+            .references('id')
+            .inTable('products')
+            .onDelete('CASCADE');
+    });
+}
 
-            table
-                .foreign('produto_id')
-                .references('id')
-                .inTable('products')
-                .onDelete('CASCADE');
-        }
-    );
-
-};
-
-exports.down = async function (knex) {
-
-    await knex.schema.dropTableIfExists(
-        'ficha_tecnica_ingredientes'
-    );
-
-};
+export async function down(knex) {
+    await knex.schema.dropTableIfExists('ficha_tecnica_ingredientes');
+}

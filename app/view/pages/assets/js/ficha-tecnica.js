@@ -15,10 +15,10 @@ let listaDeProdutosFinais = [];  // Produtos finais (Pratos/Venda)
 let indexEdicaoItem = null;
 
 // =========================================================================
-// MAPEAMENTO DOS ELEMENTOS DO DOM (Sincronizados com o seu novo HTML)
+// MAPEAMENTO DOS ELEMENTOS DO DOM
 // =========================================================================
-const selectProdutoAlvo = document.getElementById('product_id');      // ID correto do HTML para o Produto Final
-const selectMateriaPrima = document.getElementById('refeicao_itens');  // ID correto do HTML para a Matéria-Prima
+const selectProdutoAlvo = document.getElementById('product_id');      // ID do Produto Final
+const selectMateriaPrima = document.getElementById('refeicao_itens');  // ID da Matéria-Prima
 const inputUnidade = document.getElementById('unidade');
 const inputQuantidade = document.getElementById('quantidade');
 const btnAddItem = document.getElementById('add-item');
@@ -45,12 +45,21 @@ function converterParaQuilos(quantidade, unidade) {
     return quantidade;
 }
 
+// Helper para limpar strings de moeda e converter para float com segurança
+function limparValorMoeda(elementoId) {
+    const el = document.getElementById(elementoId);
+    if (!el) return 0;
+    const texto = el.innerText || el.textContent || '0';
+    // Remove "R$", espaços e inverte a vírgula decimal por ponto
+    const valorLimpo = texto.replace(/R\$\s?/g, '').replace(/\s/g, '').replace(',', '.');
+    return parseFloat(valorLimpo) || 0;
+}
+
 // =========================================================================
-// 1. CARREGAR SELECT DE PRODUTOS FINAIS (CORRIGIDO VIA api.product)
+// 1. CARREGAR SELECTS (PRODUTOS FINAIS E MATÉRIAS-PRIMAS)
 // =========================================================================
 async function carregarProdutosFinaisNoSelect() {
     try {
-        // Usando 'api.product' no singular, que é a rota oficial do seu sistema
         if (typeof api.product === 'undefined' || typeof api.product.find !== 'function') {
             console.warn("A rota api.product não foi encontrada.");
             selectProdutoAlvo.innerHTML = '<option value="">Erro: API não configurada</option>';
@@ -70,14 +79,7 @@ async function carregarProdutosFinaisNoSelect() {
         listaDeProdutosFinais.forEach(prod => {
             const option = document.createElement('option');
             option.value = prod.id;
-
-            // Sincroniza com as colunas do seu banco: tenta 'refeicoes', depois 'alimentos', 'nome' ou 'descricao'
-            option.textContent = prod.refeicoes ||
-                prod.alimentos ||
-                prod.nome ||
-                prod.descricao ||
-                `Produto #${prod.id}`;
-
+            option.textContent = prod.refeicoes || prod.alimentos || prod.nome || prod.descricao || `Produto #${prod.id}`;
             selectProdutoAlvo.appendChild(option);
         });
 
@@ -87,7 +89,6 @@ async function carregarProdutosFinaisNoSelect() {
     }
 }
 
-// Carrega os ingredientes/matérias-primas no select #refeicao_itens
 async function carregarMateriasPrimasNoSelect() {
     try {
         if (typeof api.materiaPrima === 'undefined' || typeof api.materiaPrima.find !== 'function') {
@@ -116,31 +117,45 @@ async function carregarMateriasPrimasNoSelect() {
 // 2. CÁLCULO DINÂMICO DOS TOTAIS DA RECEITA
 // =========================================================================
 function calcularCustosFNutricional() {
-    let custoTotalAcumulado = 0;
+    let custoIngredientes = 0;
     let pesoTotalBruto = 0;
 
     itensFicha.forEach(item => {
-        custoTotalAcumulado += item.total;
+        custoIngredientes += Number(item.total || 0);
         pesoTotalBruto += converterParaQuilos(item.quantidade, item.unidade);
     });
 
     const rendimento = parseFloat(inputRendimento.value) || 1;
-    const custoUnitario = custoTotalAcumulado / (rendimento > 0 ? rendimento : 1);
+    const minutos = parseFloat(document.getElementById('tempo_preparo')?.value) || 0;
+
+    const maoObra = minutos * 0.50;
+    const taxa15 = custoIngredientes * 0.15;
+    const precoVenda = custoIngredientes + maoObra + taxa15;
+    const custoUnitario = precoVenda / (rendimento > 0 ? rendimento : 1);
 
     const pesoFinalDigitado = parseFloat(inputPesoFinal.value);
     const pesoExibicao = !isNaN(pesoFinalDigitado) && pesoFinalDigitado > 0 ? pesoFinalDigitado : pesoTotalBruto;
 
     if (elQtdItens) elQtdItens.textContent = itensFicha.length;
     if (elPesoTotalReceita) elPesoTotalReceita.textContent = `${pesoExibicao.toFixed(3)} kg`;
-    if (elCustoTotalReceita) elCustoTotalReceita.textContent = `R$ ${custoTotalAcumulado.toFixed(2)}`;
+    if (elCustoTotalReceita) elCustoTotalReceita.textContent = `R$ ${custoIngredientes.toFixed(2)}`;
     if (elCustoPorcao) elCustoPorcao.textContent = `R$ ${custoUnitario.toFixed(2)}`;
+
+    const elIngredientes = document.getElementById('valor-ingredientes');
+    if (elIngredientes) elIngredientes.textContent = `R$ ${custoIngredientes.toFixed(2)}`;
+
+    const elMaoObra = document.getElementById('valor-mao-obra');
+    if (elMaoObra) elMaoObra.textContent = `R$ ${maoObra.toFixed(2)}`;
+
+    const elTaxa = document.getElementById('valor-percentual');
+    if (elTaxa) elTaxa.textContent = `R$ ${taxa15.toFixed(2)}`;
+
+    const elPrecoFinal = document.getElementById('preco-venda-final');
+    if (elPrecoFinal) elPrecoFinal.textContent = `R$ ${precoVenda.toFixed(2)}`;
 }
 
-inputRendimento.addEventListener('input', calcularCustosFNutricional);
-inputPesoFinal.addEventListener('input', calcularCustosFNutricional);
-
 // =========================================================================
-// 3. EVENTOS E RENDERIZAÇÃO DA LISTA DE PRODUTOS/INGREDIENTES
+// 3. EVENTOS E RENDERIZAÇÃO DA LISTA DE INGREDIENTES
 // =========================================================================
 function renderizarTabelaItens() {
     tableBody.innerHTML = '';
@@ -202,7 +217,6 @@ btnAddItem.addEventListener('click', async () => {
 
         const nomeMateriaPrima = produtoOriginal?.nome || `Insumo #${materiaPrimaId}`;
         const precoCompraTabela = parseFloat(produtoOriginal?.preco_compra || 0);
-
         const nomeProdutoAlvo = selectProdutoAlvo.options[selectProdutoAlvo.selectedIndex].text;
 
         let precoUnitarioCalculado = precoCompraTabela;
@@ -235,7 +249,6 @@ btnAddItem.addEventListener('click', async () => {
             itensFicha.push(itemEstruturado);
         }
 
-        // Reseta campos do ingrediente
         selectMateriaPrima.value = '';
         inputUnidade.value = '';
         inputQuantidade.value = '';
@@ -269,7 +282,7 @@ window.removerItemFicha = function (index) {
 };
 
 // =========================================================================
-// 4. INICIALIZAÇÃO E PREENCHIMENTO DOS DADOS (DOM READY)
+// 4. INICIALIZAÇÃO DOS DADOS (DOM READY)
 // =========================================================================
 window.addEventListener('DOMContentLoaded', async () => {
     await carregarProdutosFinaisNoSelect();
@@ -301,7 +314,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 });
 
 // =========================================================================
-// 5. ENVIAR FORMULÁRIO COMPLETO (SAVE)
+// 5. ENVIAR FORMULÁRIO COMPLETO (SALVAR/ATUALIZAR)
 // =========================================================================
 btnSalvar.addEventListener('click', async () => {
     const action = document.getElementById('action').value;
@@ -315,18 +328,27 @@ btnSalvar.addEventListener('click', async () => {
 
     btnSalvar.disabled = true;
 
-    const custoTotalLimpo = parseFloat(elCustoTotalReceita.textContent.replace('R$', '').trim()) || 0;
-    const custoUnitarioLimpo = parseFloat(elCustoPorcao.textContent.replace('R$', '').trim()) || 0;
+    // Capturando os dados financeiros limpos usando a nova função helper estruturada
+    const custoTotalLimpo = limparValorMoeda('custo-total-receita');
+    const custoUnitarioLimpo = limparValorMoeda('custo-porcao');
+    const maoObraLimpo = limparValorMoeda('valor-mao-obra');
+    const taxa15Limpo = limparValorMoeda('valor-percentual');
+    const precoVendaLimpo = limparValorMoeda('preco-venda-final');
 
     const data = {
-        nome_produto: nome_produto,
+        nome_produto,
         categoria: document.getElementById('categoria').value,
         rendimento: parseFloat(inputRendimento.value) || 1,
         peso_final: parseFloat(inputPesoFinal.value) || 0,
         observacao: document.getElementById('observacao').value,
         ativo: document.getElementById('ativo').checked ? 1 : 0,
+
         custo_total: custoTotalLimpo,
         custo_unitario: custoUnitarioLimpo,
+        mao_obra: maoObraLimpo,
+        taxa_15: taxa15Limpo,
+        preco_venda: precoVendaLimpo,
+
         itens: itensFicha
     };
 
@@ -338,8 +360,9 @@ btnSalvar.addEventListener('click', async () => {
             response = await api.fichaTecnica.insert(data);
         }
 
-        if (response && response.status) {
-            toast('success', 'Sucesso', response.msg || response.message);
+        // Verifica os formatos de sucesso mais comuns de APIs (status: true, ou se retornou o objeto criado com id)
+        if (response && (response.status || response.id || response.success)) {
+            toast('success', 'Sucesso', response.msg || response.message || 'Salvo com sucesso!');
             await api.temp.set('ficha-tecnica:edit', null).catch(() => { });
             setTimeout(() => api.window.close(), 1000);
         } else {

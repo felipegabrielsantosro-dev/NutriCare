@@ -7,6 +7,7 @@ import { Print } from '../mixin/Print.js';
 import Product from '../controller/Product.js';
 import MateriaPrima from '../controller/MateriaPrima.js';
 import FichaTecnica from '../controller/FichaTecnica.js';
+import FichaTecnicaIngredientes from '../controller/FichaTecnicaIngredientes.js';
 
 function getWin(event) {
     return BrowserWindow.fromWebContents(event.sender);
@@ -235,35 +236,52 @@ ipcMain.handle('ficha-tecnica:delete', async (_e, id) => {
 // RETORNADO: COMPLEMENTO PARA GERENCIAMENTO DE INGREDIENTES DA FICHA
 // =========================================================================
 
-// Insere ou vincula um ingrediente/insumo a uma ficha técnica
 ipcMain.handle('ficha-tecnica-ingredientes:insert', async (_e, data) => {
-    // Exemplo de chamada ao seu Model (ajuste o nome se a classe for diferente, ex: FichaTecnicaIngrediente)
-    const result = await FichaTecnica.insertIngrediente ? await FichaTecnica.insertIngrediente(data) : { status: false, msg: 'Método não implementado' };
+    try {
+        let result;
 
-    // Dispara o recarregamento na tela de gerenciamento se necessário
-    if (result.status) {
-        broadcastReload('ficha-tecnica:reload');
-        broadcastReload('ficha-tecnica-ingredientes:reload');
+        // Verifica se o payload veio em lote completo (passado pelo frontend otimizado)
+        if (data.ingredientes && Array.isArray(data.ingredientes)) {
+            result = await FichaTecnicaIngredientes.insertMany(data.ficha_tecnica_id, data.ingredientes);
+        } else {
+            // Se vier um único objeto solto, envolve em um array para o insertMany aceitar
+            result = await FichaTecnicaIngredientes.insertMany(data.ficha_tecnica_id, [data]);
+        }
+
+        if (result.status) {
+            broadcastReload('ficha-tecnica:reload');
+            broadcastReload('ficha-tecnica-ingredientes:reload');
+        }
+        return result;
+    } catch (error) {
+        console.error("Erro no Electron ao rodar insertMany:", error);
+        return { status: false, msg: 'Erro interno no banco: ' + error.message };
     }
-    return result;
 });
 
-// Remove um ingrediente específico de uma ficha técnica
-ipcMain.handle('ficha-tecnica-ingredientes:delete', async (_e, id) => {
-    const result = await FichaTecnica.deleteIngrediente ? await FichaTecnica.deleteIngrediente(id) : { status: false, msg: 'Método não implementado' };
+ipcMain.handle('ficha-tecnica-ingredientes:delete', async (_e, fichaId) => {
+    try {
+        // Usa o método correto do seu Model para limpar a ficha técnica
+        const result = await FichaTecnicaIngredientes.deleteByFichaTecnica(fichaId);
 
-    if (result.status) {
-        broadcastReload('ficha-tecnica:reload');
-        broadcastReload('ficha-tecnica-ingredientes:reload');
+        if (result.status) {
+            broadcastReload('ficha-tecnica:reload');
+            broadcastReload('ficha-tecnica-ingredientes:reload');
+        }
+        return result;
+    } catch (error) {
+        console.error("Erro no Electron ao rodar deleteByFichaTecnica:", error);
+        return { status: false, msg: 'Erro interno ao deletar: ' + error.message };
     }
-    return result;
 });
 
 // Lista todos os ingredientes vinculados a um ID de ficha técnica específico
 ipcMain.handle('ficha-tecnica-ingredientes:findByFichaId', async (_e, fichaId) => {
-    if (FichaTecnica.findIngredientesByFichaId) {
-        return await FichaTecnica.findIngredientesByFichaId(fichaId);
+    try {
+        // Usa o método de busca correto do seu Model
+        return await FichaTecnicaIngredientes.findByFichaTecnica(fichaId);
+    } catch (error) {
+        console.error("Erro no Electron ao rodar findByFichaTecnica:", error);
+        return { status: false, msg: 'Erro interno ao buscar ingredientes: ' + error.message };
     }
-    // Fallback caso sua busca use o find genérico com filtro
-    return await FichaTecnica.find({ ficha_tecnica_id: fichaId });
 });

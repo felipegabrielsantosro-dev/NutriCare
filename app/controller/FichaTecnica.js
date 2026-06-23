@@ -3,6 +3,8 @@ import connection from '../database/Connection.js';
 export default class FichaTecnica {
 
     static table = 'ficha_tecnica';
+    // Centralizando o nome da tabela de ingredientes corrigida da migration
+    static ingredientsTable = 'ficha_tecnica_ingredientes';
 
     static async find(where = {}) {
         const data = await connection(this.table)
@@ -27,17 +29,18 @@ export default class FichaTecnica {
             };
         }
 
-        data.itens = await connection('ficha_tecnica_itens')
+        // CORRIGIDO: Busca na tabela nova criada pela migration
+        data.itens = await connection(this.ingredientsTable)
             .leftJoin(
                 'products',
                 'products.id',
-                'ficha_tecnica_itens.produto_id'
+                `${this.ingredientsTable}.produto_id`
             )
             .where({
                 ficha_tecnica_id: id
             })
             .select(
-                'ficha_tecnica_itens.*',
+                `${this.ingredientsTable}.*`,
                 'products.alimentos'
             );
 
@@ -68,14 +71,14 @@ export default class FichaTecnica {
 
             if (Array.isArray(data.itens)) {
                 for (const item of data.itens) {
-                    await trx('ficha_tecnica_itens')
+                    // CORRIGIDO: Salva apenas as colunas reais da migration
+                    await trx(this.ingredientsTable)
                         .insert({
                             ficha_tecnica_id: id,
-                            produto_id: item.produto_id,
+                            produto_id: Number(item.produto_id),
                             quantidade: parseFloat(item.quantidade) || 1,
                             unidade: item.unidade || 'UN',
-                            preco_unitario: parseFloat(item.preco_unitario || item.precoUnitario) || 0,
-                            valor_total: parseFloat(item.total || item.valor_total) || 0
+                            ativo: true
                         });
                 }
             }
@@ -115,20 +118,21 @@ export default class FichaTecnica {
                     ativo: data.ativo ? 1 : 0
                 });
 
-            await trx('ficha_tecnica_itens')
+            // CORRIGIDO: Limpa os registros da tabela correta
+            await trx(this.ingredientsTable)
                 .where({ ficha_tecnica_id: id })
                 .del();
 
             if (Array.isArray(data.itens)) {
                 for (const item of data.itens) {
-                    await trx('ficha_tecnica_itens')
+                    // CORRIGIDO: Insere com as colunas limpas da nova migration
+                    await trx(this.ingredientsTable)
                         .insert({
                             ficha_tecnica_id: id,
-                            produto_id: item.produto_id,
+                            produto_id: Number(item.produto_id),
                             quantidade: parseFloat(item.quantidade) || 1,
                             unidade: item.unidade || 'UN',
-                            preco_unitario: parseFloat(item.preco_unitario || item.precoUnitario) || 0,
-                            valor_total: parseFloat(item.total || item.valor_total) || 0
+                            ativo: true
                         });
                 }
             }
@@ -168,12 +172,8 @@ export default class FichaTecnica {
         }
     }
 
-    // =========================================================================
-    // NOVO MÉTODO: Busca receita completa com ingredientes limpos pelo nome
-    // =========================================================================
     static async findRecipeByName(nomeProduto) {
         try {
-            // 1. Busca os dados da ficha do prato (ex: Estrogonofe)
             const prato = await connection(this.table)
                 .where('nome_produto', 'like', `%${nomeProduto}%`)
                 .andWhere({ ativo: 1 })
@@ -186,14 +186,14 @@ export default class FichaTecnica {
                 };
             }
 
-            // 2. Busca apenas os ingredientes e quantidades vinculadas
-            prato.ingredientes = await connection('ficha_tecnica_itens')
-                .leftJoin('products', 'products.id', 'ficha_tecnica_itens.produto_id')
+            // CORRIGIDO: Busca os ingredientes na tabela da migration
+            prato.ingredientes = await connection(this.ingredientsTable)
+                .leftJoin('products', 'products.id', `${this.ingredientsTable}.produto_id`)
                 .where({ ficha_tecnica_id: prato.id })
                 .select(
                     'products.alimentos as nome_ingrediente',
-                    'ficha_tecnica_itens.quantidade',
-                    'ficha_tecnica_itens.unidade'
+                    `${this.ingredientsTable}.quantidade`,
+                    `${this.ingredientsTable}.unidade`
                 );
 
             return {
