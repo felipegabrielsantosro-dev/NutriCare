@@ -160,35 +160,44 @@ function calcularCustosFNutricional() {
 function renderizarTabelaItens() {
     tableBody.innerHTML = '';
 
-    if (itensFicha.length === 0) {
+    if (!itensFicha || itensFicha.length === 0) {
         tableBody.innerHTML = `
             <tr>
                 <td colspan="7" class="text-center text-muted py-3">
                     Nenhum produto ou ingrediente adicionado à lista.
                 </td>
             </tr>`;
+
         calcularCustosFNutricional();
         return;
     }
 
     itensFicha.forEach((item, index) => {
+        const precoUnitario = Number(item.precoUnitario) || 0;
+        const total = Number(item.total) || 0;
+
         const tr = document.createElement('tr');
+
         tr.innerHTML = `
-            <td><strong>${item.produto_alvo_nome}</strong></td>
-            <td>${item.nome}</td>
-            <td>${item.quantidade}</td>
-            <td>${item.unidade}</td>
-            <td>R$ ${item.precoUnitario.toFixed(2)}</td>
-            <td>R$ ${item.total.toFixed(2)}</td>
+            <td><strong>${item.produto_alvo_nome || '-'}</strong></td>
+            <td>${item.nome || '-'}</td>
+            <td>${item.quantidade ?? 0}</td>
+            <td>${item.unidade || '-'}</td>
+            <td>R$ ${precoUnitario.toFixed(2)}</td>
+            <td>R$ ${total.toFixed(2)}</td>
             <td class="text-center">
-                <button type="button" class="btn btn-warning btn-sm me-1" onclick="editarItemFicha(${index})">
+                <button type="button" class="btn btn-warning btn-sm me-1"
+                    onclick="editarItemFicha(${index})">
                     <i class="fa-solid fa-pen"></i>
                 </button>
-                <button type="button" class="btn btn-danger btn-sm" onclick="removerItemFicha(${index})">
+
+                <button type="button" class="btn btn-danger btn-sm"
+                    onclick="removerItemFicha(${index})">
                     <i class="fa-solid fa-trash"></i>
                 </button>
             </td>
         `;
+
         tableBody.appendChild(tr);
     });
 

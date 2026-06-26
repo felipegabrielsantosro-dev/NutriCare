@@ -3,7 +3,6 @@ import connection from '../database/Connection.js';
 export default class FichaTecnica {
 
     static table = 'ficha_tecnica';
-    // Centralizando o nome da tabela de ingredientes corrigida da migration
     static ingredientsTable = 'ficha_tecnica_ingredientes';
 
     static async find(where = {}) {
@@ -11,95 +10,91 @@ export default class FichaTecnica {
             .where(where)
             .orderBy('id', 'desc');
 
-        return {
-            status: true,
-            data
-        };
+        return { status: true, data };
     }
 
     static async findById(id) {
-        const data = await connection(this.table)
-            .where({ id })
-            .first();
+        const data = await connection(this.table).where({ id }).first();
 
         if (!data) {
-            return {
-                status: false,
-                message: 'Ficha técnica não encontrada.'
-            };
+            return { status: false, message: 'Ficha técnica não encontrada.' };
         }
 
-        // CORRIGIDO: Busca na tabela nova criada pela migration
         data.itens = await connection(this.ingredientsTable)
-            .leftJoin(
-                'products',
-                'products.id',
-                `${this.ingredientsTable}.produto_id`
-            )
-            .where({
-                ficha_tecnica_id: id
-            })
+            .leftJoin('products', 'products.id', `${this.ingredientsTable}.produto_id`)
+            .where({ ficha_tecnica_id: id })
             .select(
                 `${this.ingredientsTable}.*`,
                 'products.alimentos'
             );
 
-        return {
-            status: true,
-            data
-        };
+        return { status: true, data };
     }
 
     static async insert(data) {
-        const trx = await connection.transaction();
+    const trx = await connection.transaction();
 
-        try {
-            const [insertedRow] = await trx(this.table)
-                .insert({
-                    nome_produto: data.nome_produto,
-                    categoria: data.categoria,
-                    rendimento: data.rendimento,
-                    peso_final: data.peso_final,
-                    custo_total: data.custo_total,
-                    custo_unitario: data.custo_unitario,
-                    observacao: data.observacao,
-                    ativo: data.ativo ? 1 : 0
-                })
-                .returning('id');
+    try {
+        // 1. Insere a Ficha Técnica principal
+        const [insertedRow] = await trx(this.table)
+            .insert({
+                nome_produto: data.nome_produto,
+                categoria: data.categoria,
+                rendimento: data.rendimento,
+                peso_final: data.peso_final,
+                custo_total: data.custo_total,
+                custo_unitario: data.custo_unitario,
+                observacao: data.observacao,
+                ativo: data.ativo ? true : false
+            })
+            .returning('id');
 
-            const id = typeof insertedRow === 'object' ? insertedRow.id : insertedRow;
+        const id = typeof insertedRow === 'object' ? insertedRow.id : insertedRow;
 
-            if (Array.isArray(data.itens)) {
-                for (const item of data.itens) {
-                    // CORRIGIDO: Salva apenas as colunas reais da migration
-                    await trx(this.ingredientsTable)
-                        .insert({
-                            ficha_tecnica_id: id,
-                            produto_id: Number(item.produto_id),
-                            quantidade: parseFloat(item.quantidade) || 1,
-                            unidade: item.unidade || 'UN',
-                            ativo: true
-                        });
+        // 2. MONTA A ARRAY COM TODOS OS INGREDIENTES PRIMEIRO
+        if (Array.isArray(data.itens) && data.itens.length > 0) {
+            const itensParaInserir = [];
+
+            for (const [index, item] of data.itens.entries()) {
+                const prodId = Number(item.produto_id);
+
+                // Validação de segurança para cada item
+                if (!prodId || isNaN(prodId)) {
+                    throw new Error(`O ingrediente na posição ${index + 1} está sem um produto_id válido.`);
                 }
+
+                // Adiciona o objeto formatado na nossa lista
+                itensParaInserir.push({
+                    ficha_tecnica_id: id,
+                    produto_id: prodId,
+                    quantidade: parseFloat(item.quantidade) || 0,
+                    unidade: item.unidade || 'UN',
+                    ativo: true
+                });
             }
 
-            await trx.commit();
-
-            return {
-                status: true,
-                id,
-                message: 'Ficha técnica cadastrada com sucesso.'
-            };
-
-        } catch (error) {
-            await trx.rollback();
-            console.error("Erro no Model FichaTecnica (Insert):", error);
-            return {
-                status: false,
-                message: 'Erro interno no banco: ' + error.message
-            };
+            // 3. FAZ APENAS UMA QUERY PARA TODOS OS ITENS (Mágica do Bulk Insert)
+            // Isso aceita 2, 20 ou 100 ingredientes de uma vez só sem travar
+            await trx(this.ingredientsTable).insert(itensParaInserir);
         }
+
+        // Finaliza a transação salvando tudo junto
+        await trx.commit();
+        return { status: true, id, message: 'Ficha técnica cadastrada com sucesso.' };
+
+    } catch (error) {
+        // Se der qualquer erro em qualquer ingrediente, desfaz tudo para não sujar o banco
+        await trx.rollback();
+        console.error("Erro no Model FichaTecnica (Insert):", error);
+        
+        return {
+            status: false,
+            message: error.message.includes('violates foreign key constraint')
+                ? 'Erro: Um ou mais produtos selecionados não existem no banco de dados.'
+                : 'Erro interno: ' + error.message
+        };
     }
+}
 
     static async update(id, data) {
         const trx = await connection.transaction();
@@ -115,60 +110,50 @@ export default class FichaTecnica {
                     custo_total: data.custo_total,
                     custo_unitario: data.custo_unitario,
                     observacao: data.observacao,
-                    ativo: data.ativo ? 1 : 0
+                    ativo: data.ativo ? true : false
                 });
 
-            // CORRIGIDO: Limpa os registros da tabela correta
-            await trx(this.ingredientsTable)
-                .where({ ficha_tecnica_id: id })
-                .del();
+            // Limpa os ingredientes antigos da ficha antes de reinserir os novos atualizados
+            await trx(this.ingredientsTable).where({ ficha_tecnica_id: id }).del();
 
-            if (Array.isArray(data.itens)) {
-                for (const item of data.itens) {
-                    // CORRIGIDO: Insere com as colunas limpas da nova migration
-                    await trx(this.ingredientsTable)
-                        .insert({
-                            ficha_tecnica_id: id,
-                            produto_id: Number(item.produto_id),
-                            quantidade: parseFloat(item.quantidade) || 1,
-                            unidade: item.unidade || 'UN',
-                            ativo: true
-                        });
+            if (Array.isArray(data.itens) && data.itens.length > 0) {
+                const itensParaInserir = [];
+
+                for (const [index, item] of data.itens.entries()) {
+                    const prodId = Number(item.produto_id);
+
+                    if (!prodId || isNaN(prodId)) {
+                        throw new Error(`O ingrediente na posição ${index + 1} está sem um produto_id válido.`);
+                    }
+
+                    itensParaInserir.push({
+                        ficha_tecnica_id: id,
+                        produto_id: prodId,
+                        quantidade: parseFloat(item.quantidade) || 0,
+                        unidade: item.unidade || 'UN',
+                        ativo: true
+                    });
                 }
+
+                await trx(this.ingredientsTable).insert(itensParaInserir);
             }
 
             await trx.commit();
-
-            return {
-                status: true,
-                message: 'Ficha técnica atualizada com sucesso.'
-            };
+            return { status: true, message: 'Ficha técnica atualizada com sucesso.' };
 
         } catch (error) {
             await trx.rollback();
             console.error("Erro no Model FichaTecnica (Update):", error);
-            return {
-                status: false,
-                message: 'Erro interno no banco: ' + error.message
-            };
+            return { status: false, message: 'Erro interno no banco: ' + error.message };
         }
     }
 
     static async delete(id) {
         try {
-            await connection(this.table)
-                .where({ id })
-                .del();
-
-            return {
-                status: true,
-                message: 'Ficha técnica removida com sucesso.'
-            };
+            await connection(this.table).where({ id }).del();
+            return { status: true, message: 'Ficha técnica removida com sucesso.' };
         } catch (error) {
-            return {
-                status: false,
-                message: error.message
-            };
+            return { status: false, message: error.message };
         }
     }
 
@@ -176,17 +161,13 @@ export default class FichaTecnica {
         try {
             const prato = await connection(this.table)
                 .where('nome_produto', 'like', `%${nomeProduto}%`)
-                .andWhere({ ativo: 1 })
+                .andWhere({ ativo: true })
                 .first();
 
             if (!prato) {
-                return {
-                    status: false,
-                    message: `A receita de "${nomeProduto}" não foi encontrada.`
-                };
+                return { status: false, message: `A receita de "${nomeProduto}" não foi encontrada.` };
             }
 
-            // CORRIGIDO: Busca os ingredientes na tabela da migration
             prato.ingredientes = await connection(this.ingredientsTable)
                 .leftJoin('products', 'products.id', `${this.ingredientsTable}.produto_id`)
                 .where({ ficha_tecnica_id: prato.id })
@@ -196,17 +177,10 @@ export default class FichaTecnica {
                     `${this.ingredientsTable}.unidade`
                 );
 
-            return {
-                status: true,
-                data: prato
-            };
-
+            return { status: true, data: prato };
         } catch (error) {
-            console.error("Erro ao buscar ingredientes da receita por nome:", error);
-            return {
-                status: false,
-                message: 'Erro ao processar a receita: ' + error.message
-            };
+            console.error("Erro ao buscar receita por nome:", error);
+            return { status: false, message: 'Erro ao processar a receita: ' + error.message };
         }
     }
 }

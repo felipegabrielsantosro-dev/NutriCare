@@ -8,7 +8,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (fieldFicha) fieldFicha.value = fichaId;
 
     await carregarDadosFicha();
-    await carregarSeletorProdutos();
+    await carregarSeletorProdutos();       // Alimenta o select "product_id" (Produto)
+    await carregarSeletorMateriasPrimas(); // Alimenta o select "refeicao_itens" (Ingrediente)
 
     renderizarTabela();
     renderizarResumoFinanceiro();
@@ -22,13 +23,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 /**
- * 1. Busca os dados da receita original do banco usando o Preload correto
+ * 1. Busca os dados da receita original do banco
  */
 async function carregarDadosFicha() {
     try {
         console.log(`Buscando ingredientes salvos para a ficha ID: ${fichaId}...`);
 
-        // Chamada usando a estrutura exata do seu Preload
         const resultado = await api.fichaTecnicaIngredientes.findByFichaId(Number(fichaId));
         console.log("Ingredientes retornados pelo Electron:", resultado);
 
@@ -66,7 +66,7 @@ async function carregarDadosFicha() {
 }
 
 /**
- * 2. Popula o Select injetando a propriedade data-preco
+ * 2. Popula o Select de PRODUTOS PRINCIPAIS (id="product_id")
  */
 async function carregarSeletorProdutos() {
     try {
@@ -86,7 +86,6 @@ async function carregarSeletorProdutos() {
                 console.warn(`Rota /api/product retornou status ${fetchReq.status}. Tentando /api/produtos...`);
                 fetchReq = await fetch('/api/produtos');
             }
-
             response = await fetchReq.json();
         }
 
@@ -103,19 +102,14 @@ async function carregarSeletorProdutos() {
         produtos.forEach(prod => {
             const option = document.createElement('option');
             option.value = String(prod.id || prod.produto_id || '');
-            option.textContent = prod.alimentos || prod.nome || prod.nome_produto || prod.nome_ingrediente || `Produto #${prod.id}`;
-            option.dataset.preco = prod.preco_compra || prod.preco || 0;
+            option.textContent = prod.alimentos || prod.nome || prod.nome_produto || prod.nome_heading || `Produto #${prod.id}`;
             select.appendChild(option);
         });
 
-        // Evento change atrelado dinamicamente
         select.addEventListener('change', carregarIngredientesDoProdutoSelecionado);
 
     } catch (error) {
         console.error('Erro detalhado ao carregar produtos:', error);
-        if (document.getElementById('product_id')) {
-            document.getElementById('product_id').innerHTML = '<option value="">Erro ao carregar produtos (veja o console F12)</option>';
-        }
     }
 }
 
@@ -174,30 +168,30 @@ async function carregarIngredientesDoProdutoSelecionado(event) {
 }
 
 /**
- * 4. Adiciona ou atualiza um item na lista em memória
+ * 4. CORREÇÃO: Adiciona ou atualiza um item coletando do select de INGREDIENTES (id="refeicao_itens")
  */
 function adicionarIngredienteNaLista() {
-    const select = document.getElementById('product_id');
+    const select = document.getElementById('refeicao_itens'); // Corrigido para capturar o ingrediente
     const inputQuantidade = document.getElementById('quantidade');
     const inputUnidade = document.getElementById('unidade');
     const btnAdd = document.getElementById('btn-add');
 
     if (!select || !inputQuantidade || !inputUnidade) return;
 
-    const produtoId = select.value;
+    const ingredienteId = select.value;
     const nomeIngrediente = select.options[select.selectedIndex]?.text;
     const quantidade = parseFloat(inputQuantidade.value);
     const unidade = inputUnidade.value.trim();
 
-    if (!produtoId || isNaN(quantidade) || quantidade <= 0 || !unidade) {
-        alert('Por favor, preencha todos os campos corretamente antes de adicionar.');
+    if (!ingredienteId || isNaN(quantidade) || quantidade <= 0 || !unidade) {
+        alert('Por favor, selecione um ingrediente e preencha a quantidade/unidade corretamente.');
         return;
     }
 
     const preco_compra = parseFloat(select.options[select.selectedIndex].dataset.preco || 0);
 
     const ingrediente = {
-        produto_id: String(produtoId),
+        produto_id: String(ingredienteId),
         nome_ingrediente: nomeIngrediente,
         quantidade,
         unidade,
@@ -212,7 +206,7 @@ function adicionarIngredienteNaLista() {
             btnAdd.className = "btn btn-success";
         }
     } else {
-        const jaExiste = ingredientesVinculados.some(item => String(item.produto_id) === String(produtoId));
+        const jaExiste = ingredientesVinculados.some(item => String(item.produto_id) === String(ingredienteId));
         if (jaExiste) {
             alert('Este ingrediente já foi adicionado à lista.');
             return;
@@ -244,7 +238,7 @@ function renderizarTabela() {
 
     ingredientesVinculados.forEach((item, index) => {
         const tr = document.createElement('tr');
-        const nomeMateriaPrima = item.nome || item.nome_ingrediente || 'Sem nome';
+        const nomeMateriaPrima = item.nome_ingrediente || item.nome || 'Sem nome';
         const unidadeMedida = item.unidade || 'un';
         const quantidade = item.quantidade || 0;
 
@@ -266,11 +260,11 @@ function renderizarTabela() {
 }
 
 /**
- * 6. Gerenciadores de Edição e Remoção (Escopo Global explícito para módulos)
+ * 6. CORREÇÃO: Gerenciadores de Edição corrigidos para o ID "refeicao_itens"
  */
 window.editarIngrediente = function (index) {
     const item = ingredientesVinculados[index];
-    const select = document.getElementById('product_id');
+    const select = document.getElementById('refeicao_itens'); // Corrigido
     const btnAdd = document.getElementById('btn-add');
 
     if (!select) return;
@@ -356,7 +350,7 @@ function renderizarResumoFinanceiro() {
 }
 
 /**
- * 8. Envia o Payload limpo e definitivo para o Electron (Lote de Itens)
+ * 8. Envia o Payload para o Electron
  */
 async function salvarFichaTecnica() {
     if (ingredientesVinculados.length === 0) {
@@ -371,12 +365,9 @@ async function salvarFichaTecnica() {
         const fieldFichaId = document.getElementById('ficha_id');
         const fichaIdAtual = Number(fieldFichaId ? fieldFichaId.value : fichaId);
 
-        // 1. Primeiro manda limpar os registros antigos
         console.log("Limpando registros antigos da ficha ID:", fichaIdAtual);
         await api.fichaTecnicaIngredientes.delete(fichaIdAtual);
 
-        // 2. Monta a lista APENAS com o que a sua Migration aceita!
-        // Removemos preço_unitario e valor_total daqui de forma definitiva
         const listaParaInserir = ingredientesVinculados.map(ing => ({
             produto_id: Number(ing.produto_id),
             quantidade: parseFloat(ing.quantidade) || 0,
@@ -385,27 +376,116 @@ async function salvarFichaTecnica() {
 
         console.log("Enviando dados puros e compatíveis com a nova Migration:", listaParaInserir);
 
-        // Criamos o objeto exatamente no formato que o seu handle espera ler
         const payloadDoHandle = {
             ficha_tecnica_id: fichaIdAtual,
             ingredientes: listaParaInserir
         };
 
-        // 3. Envia para o processo principal do Electron
         const respostaInsert = await api.fichaTecnicaIngredientes.insert(payloadDoHandle);
-        console.log("Resposta do Knex recebida no frontend:", respostaInsert);
 
         if (respostaInsert && (respostaInsert.status || respostaInsert.success)) {
             alert('Todos os ingredientes foram salvos com sucesso!');
-            await carregarDadosFicha(); // Recarrega a listagem na tela
+            await carregarDadosFicha();
         } else {
             alert('Erro ao salvar no banco: ' + (respostaInsert?.msg || 'Erro de validação.'));
         }
 
     } catch (error) {
         console.error('Erro crítico no processo de salvamento do frontend:', error);
-        alert('Erro ao processar o salvamento. Verifique se salvou todos os arquivos no VS Code.');
+        alert('Erro ao processar o salvamento.');
     } finally {
         if (btnSalvar) btnSalvar.disabled = false;
+    }
+}
+
+/**
+ * 9. Popula o Select de INGREDIENTES / MATÉRIAS-PRIMAS (id="refeicao_itens")
+ */
+async function carregarSeletorMateriasPrimas() {
+    try {
+        const select = document.getElementById('refeicao_itens');
+        if (!select) return;
+
+        console.log('Buscando matérias-primas via api.materiaPrima.find...');
+
+        const response = await api.materiaPrima.find({ limit: 500, offset: 0 });
+        const materiasPrimas = response?.data || response?.rows || response || [];
+
+        select.innerHTML = '<option value="" selected disabled>Selecione o ingrediente...</option>';
+
+        if (materiasPrimas.length === 0) {
+            select.innerHTML = '<option value="">Nenhum ingrediente encontrado</option>';
+            return;
+        }
+
+        materiasPrimas.forEach(item => {
+            const option = document.createElement('option');
+            option.value = String(item.id);
+            option.textContent = item.nome || item.alimentos || item.nome_ingrediente || `Insumo #${item.id}`;
+            option.dataset.preco = item.preco_compra || item.preco || 0;
+            option.dataset.unidade = item.unidade_medida || item.unidade || "g";
+            select.appendChild(option);
+        });
+
+        console.log("Select de ingredientes ('refeicao_itens') populado com sucesso!");
+
+    } catch (error) {
+        console.error('Erro detalhado ao carregar matérias-primas:', error);
+    }
+}
+
+function renderizarTabelaItens() {
+    tableBody.innerHTML = '';
+
+    if (!itensFicha.length) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="7" class="text-center text-muted py-3">
+                    Nenhum ingrediente encontrado para este produto.
+                </td>
+            </tr>`;
+        calcularCustosFNutricional();
+        return;
+    }
+
+    itensFicha.forEach((item, index) => {
+        const tr = document.createElement('tr');
+
+        tr.innerHTML = `
+            <td><strong>${item.produto_alvo_nome || '-'}</strong></td>
+            <td>${item.nome || '-'}</td>
+            <td>${item.quantidade}</td>
+            <td>${item.unidade}</td>
+            <td>R$ ${Number(item.precoUnitario || 0).toFixed(2)}</td>
+            <td>R$ ${Number(item.total || 0).toFixed(2)}</td>
+            <td class="text-center">
+                <button class="btn btn-warning btn-sm" onclick="editarItemFicha(${index})">✏️</button>
+                <button class="btn btn-danger btn-sm" onclick="removerItemFicha(${index})">🗑</button>
+            </td>
+        `;
+
+        tableBody.appendChild(tr);
+    });
+
+    calcularCustosFNutricional();
+}
+
+async function carregarReceitaProduto(produtoId) {
+
+    if (!produtoId) return;
+
+    try {
+        const response = await api.fichaTecnica.findByProductId(produtoId);
+
+        // ajuste conforme sua API retorna
+        const itens = response?.data?.itens || response?.itens || [];
+
+        itensFicha = itens;
+
+        renderizarTabelaItens();
+
+    } catch (error) {
+        console.error("Erro ao carregar receita:", error);
+        toast('error', 'Erro', 'Não foi possível carregar a receita do produto.');
     }
 }

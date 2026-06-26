@@ -1,7 +1,7 @@
 exports.up = async function (knex) {
-
+    // Mantém apenas a tabela principal da Ficha Técnica
     await knex.schema.createTable('ficha_tecnica', (table) => {
-        table.increments('id');
+        table.increments('id').primary();
         table.string('nome_produto', 150).notNullable();
         table.string('categoria', 100);
         table.integer('rendimento').defaultTo(0);
@@ -13,46 +13,9 @@ exports.up = async function (knex) {
         table.timestamp('data_criacao').defaultTo(knex.fn.now());
         table.timestamp('data_atualizacao').defaultTo(knex.fn.now());
     });
-
-    await knex.schema.createTable('ficha_tecnica_itens', (table) => {
-        table.increments('id');
-
-        table.integer('ficha_tecnica_id')
-            .unsigned()
-            .notNullable()
-            .references('id')
-            .inTable('ficha_tecnica')
-            .onDelete('CASCADE');
-
-        table.integer('produto_id')
-            .unsigned()
-            .notNullable()
-            .references('id')
-            .inTable('products') // Garanta que o nome da sua tabela de produtos seja 'products' mesmo
-            .onDelete('CASCADE');
-
-        table.decimal('quantidade', 10, 3).defaultTo(0);
-        table.string('unidade', 20);
-        table.decimal('preco_unitario', 10, 2).defaultTo(0);
-        table.decimal('valor_total', 10, 2).defaultTo(0);
-
-        // =========================================================================
-        // NOVOS CAMPOS: Salva a informação nutricional customizada deste item
-        // =========================================================================
-        table.decimal('calorias', 10, 2).defaultTo(0);
-        table.decimal('carboidratos', 10, 2).defaultTo(0);
-        table.decimal('acucar', 10, 2).defaultTo(0);
-        table.decimal('proteinas', 10, 2).defaultTo(0);
-        table.decimal('gorduras', 10, 2).defaultTo(0);
-        table.decimal('fibras', 10, 2).defaultTo(0);
-        table.decimal('sodio', 10, 2).defaultTo(0);
-        // =========================================================================
-
-        table.timestamp('data_criacao').defaultTo(knex.fn.now());
-    });
 };
 
 exports.down = async function (knex) {
-    await knex.schema.dropTableIfExists('ficha_tecnica_itens');
+    // Remove apenas a tabela que este arquivo criou
     await knex.schema.dropTableIfExists('ficha_tecnica');
 };
