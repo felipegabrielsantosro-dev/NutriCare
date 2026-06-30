@@ -151,26 +151,53 @@ ipcMain.handle('product:delete', async (_e, id) => {
 
 // Dashboard
 ipcMain.handle('dashboard:totais', async () => {
-    const ano = new Date().getFullYear();
-    const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
 
-    const [tabelas, usuarios, produtos] = await Promise.all([
-        TabelaNutricional.count(),
+    const ano = new Date().getFullYear();
+
+    const meses = [
+        'Jan', 'Fev', 'Mar', 'Abr',
+        'Mai', 'Jun', 'Jul', 'Ago',
+        'Set', 'Out', 'Nov', 'Dez'
+    ];
+
+    const [
+        usuarios,
+        produtos,
+        materiasPrimas,
+        fichas
+    ] = await Promise.all([
+
         Users.count(),
+
         Product.count(),
+
+        MateriaPrima.count(),
+
+        FichaTecnica.count()
+
     ]);
 
     const dadosProdutos = await Product.countPorMes(ano);
     const dadosUsuarios = await Users.countPorMes(ano);
 
     return {
-        tabelas,
+
         usuarios,
+
         produtos,
+
+        materiasPrimas,
+
+        fichas,
+
         meses,
+
         dadosProdutos,
-        dadosUsuarios,
+
+        dadosUsuarios
+
     };
+
 });
 
 // Quit

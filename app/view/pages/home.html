@@ -1,6 +1,6 @@
 {% extends "layouts/main.html" %}
 
-{% block title %}DESKIVO — Home{% endblock %}
+{% block title %}NutriCare — Home{% endblock %}
 
 {% block styles %}
 <link rel="stylesheet" href="file:///{{ assets }}/css/home.css">
@@ -121,20 +121,6 @@
                     </div>
                 </div>
 
-                <!-- USUÁRIOS -->
-                <div class="card stats-card bg-warning text-dark"
-                    onclick="api.window.open('pages/list-users', { title: 'Usuários' })">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <div id="total-usuarios" class="stats-number">44</div>
-                                <p class="stats-label">Usuários</p>
-                            </div>
-                            <i class="fa-solid fa-users stats-icon"></i>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- PRODUTOS -->
                 <div class="card stats-card bg-success text-white"
                     onclick="api.window.open('pages/list-product', { title: 'Produtos' })">
@@ -214,27 +200,12 @@
                     </div>
                 </div>
 
-                <!-- GRÁFICO CRESCIMENTO -->
+                <!-- GRÁFICO DISTRIBUIÇÃO -->
                 <div class="col-md-6">
                     <div class="card chart-card h-100">
                         <div class="card-header" style="color: black;">
-                            <i class="fa-solid fa-chart-line me-2"></i>
-                            Crescimento do Sistema
-                        </div>
-                        <div class="card-body">
-                            <div class="chart-container">
-                                <canvas id="graficoUsuarios"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- GRÁFICO USUÁRIOS -->
-                <div class="col-md-6">
-                    <div class="card chart-card h-100">
-                        <div class="card-header" style="color: black;">
-                            <i class="fa-solid fa-users me-2"></i>
-                            Usuários por Perfil
+                            <i class="fa-solid fa-chart-pie me-2"></i>
+                            Distribuição dos Cadastros
                         </div>
                         <div class="card-body">
                             <div class="chart-container">

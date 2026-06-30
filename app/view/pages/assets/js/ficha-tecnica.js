@@ -117,43 +117,81 @@ async function carregarMateriasPrimasNoSelect() {
 // 2. CÁLCULO DINÂMICO DOS TOTAIS DA RECEITA
 // =========================================================================
 function calcularCustosFNutricional() {
+
     let custoIngredientes = 0;
     let pesoTotalBruto = 0;
 
     itensFicha.forEach(item => {
+
         custoIngredientes += Number(item.total || 0);
-        pesoTotalBruto += converterParaQuilos(item.quantidade, item.unidade);
+
+        pesoTotalBruto += converterParaQuilos(
+            Number(item.quantidade || 0),
+            item.unidade
+        );
+
     });
 
-    const rendimento = parseFloat(inputRendimento.value) || 1;
-    const minutos = parseFloat(document.getElementById('tempo_preparo')?.value) || 0;
+    const rendimento =
+        parseFloat(inputRendimento.value) || 1;
 
-    const maoObra = minutos * 0.50;
-    const taxa15 = custoIngredientes * 0.15;
-    const precoVenda = custoIngredientes + maoObra + taxa15;
-    const custoUnitario = precoVenda / (rendimento > 0 ? rendimento : 1);
+    const minutos =
+        parseFloat(document.getElementById('tempo_preparo').value) || 0;
 
-    const pesoFinalDigitado = parseFloat(inputPesoFinal.value);
-    const pesoExibicao = !isNaN(pesoFinalDigitado) && pesoFinalDigitado > 0 ? pesoFinalDigitado : pesoTotalBruto;
+    // R$ 1,00 por minuto
+    const maoObra = minutos;
 
-    if (elQtdItens) elQtdItens.textContent = itensFicha.length;
-    if (elPesoTotalReceita) elPesoTotalReceita.textContent = `${pesoExibicao.toFixed(3)} kg`;
-    if (elCustoTotalReceita) elCustoTotalReceita.textContent = `R$ ${custoIngredientes.toFixed(2)}`;
-    if (elCustoPorcao) elCustoPorcao.textContent = `R$ ${custoUnitario.toFixed(2)}`;
+    // Custo da receita
+    const custoTotalReceita =
+        custoIngredientes + maoObra;
 
-    const elIngredientes = document.getElementById('valor-ingredientes');
-    if (elIngredientes) elIngredientes.textContent = `R$ ${custoIngredientes.toFixed(2)}`;
+    // Lucro de 30%
+    const lucro = custoTotalReceita * 0.30;
 
-    const elMaoObra = document.getElementById('valor-mao-obra');
-    if (elMaoObra) elMaoObra.textContent = `R$ ${maoObra.toFixed(2)}`;
+    // Preço sugerido
+    const precoVenda =
+        custoTotalReceita + lucro;
 
-    const elTaxa = document.getElementById('valor-percentual');
-    if (elTaxa) elTaxa.textContent = `R$ ${taxa15.toFixed(2)}`;
+    const custoPorcao =
+        custoTotalReceita / rendimento;
 
-    const elPrecoFinal = document.getElementById('preco-venda-final');
-    if (elPrecoFinal) elPrecoFinal.textContent = `R$ ${precoVenda.toFixed(2)}`;
+    const pesoFinalDigitado =
+        parseFloat(inputPesoFinal.value);
+
+    const pesoExibicao =
+        !isNaN(pesoFinalDigitado) && pesoFinalDigitado > 0
+            ? pesoFinalDigitado
+            : pesoTotalBruto;
+
+    // Cards
+
+    document.getElementById("qtd-itens").textContent =
+        itensFicha.length;
+
+    document.getElementById("peso-total-receita").textContent =
+        pesoExibicao.toFixed(3) + " kg";
+
+    document.getElementById("valor-ingredientes").textContent =
+        "R$ " + custoIngredientes.toFixed(2);
+
+    document.getElementById("valor-mao-obra").textContent =
+        "R$ " + maoObra.toFixed(2);
+
+    document.getElementById("valor-percentual").textContent =
+        "R$ " + lucro.toFixed(2);
+
+    document.getElementById("custo-porcao").textContent =
+        "R$ " + custoPorcao.toFixed(2);
+
+    // ESTE É O CUSTO TOTAL DA RECEITA
+    document.getElementById("custo-total-receita").textContent =
+        "R$ " + custoTotalReceita.toFixed(2);
+
+    // ESTE É O PREÇO FINAL
+    document.getElementById("preco-venda-final").textContent =
+        "R$ " + precoVenda.toFixed(2);
+
 }
-
 // =========================================================================
 // 3. EVENTOS E RENDERIZAÇÃO DA LISTA DE INGREDIENTES
 // =========================================================================

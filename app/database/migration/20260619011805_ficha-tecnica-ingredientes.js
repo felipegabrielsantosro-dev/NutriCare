@@ -14,6 +14,12 @@ export async function up(knex) {
 
         table.string('unidade', 20);
 
+        // Preço por unidade utilizada
+        table.decimal('preco_unitario', 12, 4).defaultTo(0);
+
+        // Valor deste ingrediente na receita
+        table.decimal('valor_ingrediente', 12, 2).defaultTo(0);
+
         table.boolean('ativo').defaultTo(true);
 
         table.timestamps(true, true);
@@ -23,7 +29,6 @@ export async function up(knex) {
             .inTable('ficha_tecnica')
             .onDelete('CASCADE');
 
-        // ALTERADO
         table.foreign('produto_id')
             .references('id')
             .inTable('materia_prima')

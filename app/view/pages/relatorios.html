@@ -15,8 +15,15 @@
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" data-bs-toggle="tab" href="#tab-usuarios">
-                <i class="fa-solid fa-users me-1"></i> Usuários
+            <a class="nav-link" data-bs-toggle="tab" href="#tab-ficha-tecnica">
+                <i class="fa-solid fa-clipboard-list me-1"></i>
+                Fichas Técnicas
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="tab" href="#tab-materia-prima">
+                <i class="fa-solid fa-carrot me-1"></i>
+                Matérias-Primas
             </a>
         </li>
     </ul>
@@ -53,65 +60,86 @@
             </div>
         </div>
 
-        <!-- USUÁRIOS -->
-        <div class="tab-pane fade" id="tab-usuarios">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="mb-0">Lista de Usuários</h5>
-                <button class="btn btn-danger btn-sm" onclick="exportarPDF('usuarios')">
-                    <i class="fa-solid fa-file-pdf me-1"></i> Exportar PDF
-                </button>
-            </div>
-            <div class="table-responsive">
-                <table class="table table-striped table-bordered" id="relatorio-usuarios">
-                    <thead class="table-warning">
-                        <tr>
-                            <th>ID</th>
-                            <th>Nome</th>
-                            <th>Email</th>
-                            <th>Sexo</th>
-                            <th>Idade</th>
-                            <th>Peso</th>
-                            <th>Altura</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tbody-usuarios">
-                        <tr>
-                            <td colspan="7" class="text-center">Carregando...</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
         <!-- FICHA TÉCNICA -->
         <div class="tab-pane fade" id="tab-ficha-tecnica">
+
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="mb-0">Fichas Técnicas Nutricionais</h5>
+                <h5 class="mb-0">Lista de Fichas Técnicas</h5>
+
                 <button class="btn btn-danger btn-sm" onclick="exportarPDF('ficha-tecnica')">
-                    <i class="fa-solid fa-file-pdf me-1"></i> Exportar PDF
+                    <i class="fa-solid fa-file-pdf me-1"></i>
+                    Exportar PDF
                 </button>
             </div>
+
             <div class="table-responsive">
-                <table class="table table-striped table-bordered" id="relatorio-nutricional">
+
+                <table class="table table-striped table-bordered" id="relatorio-ficha-tecnica">
+
                     <thead class="table-primary">
                         <tr>
                             <th>ID</th>
                             <th>Produto</th>
-                            <th>Porção</th>
-                            <th>Valor Energético</th>
-                            <th>Carboidratos</th>
-                            <th>Proteínas</th>
-                            <th>Gorduras</th>
-                            <th>Sódio</th>
+                            <th>Categoria</th>
+                            <th>Rendimento</th>
+                            <th>Peso Final</th>
+                            <th>Custo Total</th>
+                            <th>Custo Unitário</th>
                         </tr>
                     </thead>
-                    <tbody id="tbody-nutricional">
+
+                    <tbody id="tbody-ficha-tecnica">
                         <tr>
-                            <td colspan="8" class="text-center">Carregando...</td>
+                            <td colspan="7" class="text-center">
+                                Carregando...
+                            </td>
                         </tr>
                     </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+        <!-- Matéria Prima -->
+        <div class="tab-pane fade" id="tab-materia-prima">
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0">Lista de Matérias-Primas</h5>
+
+                <button class="btn btn-danger btn-sm" onclick="exportarPDF('materia-prima')">
+
+                    <i class="fa-solid fa-file-pdf me-1"></i>
+                    Exportar PDF
+
+                </button>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered" id="relatorio-materia-prima">
+
+                    <thead class="table-info">
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>Categoria</th>
+                            <th>Unidade</th>
+                            <th>Preço Compra</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="tbody-materia-prima">
+                        <tr>
+                            <td colspan="5" class="text-center">
+                                Carregando...
+                            </td>
+                        </tr>
+                    </tbody>
+
                 </table>
             </div>
+
         </div>
 
     </div>
