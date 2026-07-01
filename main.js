@@ -11,13 +11,16 @@ import './app/route/route.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const iconPath = app.isPackaged
+    ? path.join(process.resourcesPath, 'NutriCare-icon.ico')
+    : path.join(__dirname, 'app/view/pages/assets/img/NutriCare-icon.ico');
+
 app.whenReady().then(() => {
     const win = Template.create('main', {
         width: 1280,
         height: 800,
         title: 'NutriCare',
-        // 2. 👇 Aponta direto para o arquivo na raiz 👇
-        icon: path.join(__dirname, 'images.ico'),
+        icon: iconPath,
     });
 
     Template.loadView(win, 'pages/home');

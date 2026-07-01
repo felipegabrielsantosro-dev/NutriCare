@@ -269,44 +269,59 @@ btnAddItem.addEventListener('click', async () => {
         let precoUnitarioCalculado = precoCompraTabela;
         const uniBaixa = unidade.toLowerCase();
 
-        if (uniBaixa === 'g' || uniBaixa === 'ml') {
-            precoUnitarioCalculado = precoCompraTabela / 1000;
-        } else if (uniBaixa === 'mg') {
-            precoUnitarioCalculado = precoCompraTabela / 1000000;
-        }
+        switch (uniBaixa) {
 
-        const totalItem = precoUnitarioCalculado * quantidade;
+            case "g":
+            case "ml":
+                precoUnitarioCalculado = precoCompraTabela / 1000;
+                break;
 
-        const itemEstruturado = {
-            produto_alvo_id: Number(produtoAlvoId),
-            produto_alvo_nome: nomeProdutoAlvo,
-            produto_id: Number(materiaPrimaId),
-            nome: nomeMateriaPrima,
-            quantidade,
-            unidade,
-            precoUnitario: precoUnitarioCalculado,
-            total: totalItem
-        };
+            case "kg":
+            case "l":
+                precoUnitarioCalculado = precoCompraTabela;
+                break;
 
-        if (indexEdicaoItem !== null) {
-            itensFicha[indexEdicaoItem] = itemEstruturado;
-            indexEdicaoItem = null;
-            btnAddItem.innerHTML = '<i class="fa-solid fa-plus"></i> Vincular';
-        } else {
-            itensFicha.push(itemEstruturado);
-        }
-
-        selectMateriaPrima.value = '';
-        inputUnidade.value = '';
-        inputQuantidade.value = '';
-
-        document.getElementById('produto-info').classList.add('d-none');
-        renderizarTabelaItens();
-
-    } catch (error) {
-        console.error(error);
-        toast('error', 'Erro', 'Não foi possível processar a inclusão do ingrediente.');
+            case "mg":
+                precoUnitarioCalculado = precoCompraTabela / 1000000;
+                break;
+            default:
+                toast('error', 'Atenção', `Unidade de medida "${unidade}" não reconhecida. Use g, kg, ml, l ou mg.`);
+                return;
+   
     }
+
+    const totalItem = precoUnitarioCalculado * quantidade;
+
+    const itemEstruturado = {
+        produto_alvo_id: Number(produtoAlvoId),
+        produto_alvo_nome: nomeProdutoAlvo,
+        produto_id: Number(materiaPrimaId),
+        nome: nomeMateriaPrima,
+        quantidade,
+        unidade,
+        precoUnitario: precoUnitarioCalculado,
+        total: totalItem
+    };
+
+    if (indexEdicaoItem !== null) {
+        itensFicha[indexEdicaoItem] = itemEstruturado;
+        indexEdicaoItem = null;
+        btnAddItem.innerHTML = '<i class="fa-solid fa-plus"></i> Vincular';
+    } else {
+        itensFicha.push(itemEstruturado);
+    }
+
+    selectMateriaPrima.value = '';
+    inputUnidade.value = "g";
+    inputQuantidade.value = '';
+
+    document.getElementById('produto-info').classList.add('d-none');
+    renderizarTabelaItens();
+
+} catch (error) {
+    console.error(error);
+    toast('error', 'Erro', 'Não foi possível processar a inclusão do ingrediente.');
+}
 });
 
 window.editarItemFicha = function (index) {

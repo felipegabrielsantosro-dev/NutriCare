@@ -52,7 +52,7 @@
                     ]
                 }
             ],
-            "icon": "app/view/pages/assets/img/icon.png"
+            "icon": "app/view/pages/assets/img/NutriCare-icon.ico"
         },
         "nsis": {
             "oneClick": false,
@@ -60,9 +60,9 @@
             "createDesktopShortcut": true,
             "createStartMenuShortcut": true,
             "shortcutName": "NutriCare",
-            "installerIcon": "app/view/pages/assets/img/icon.png",
-            "uninstallerIcon": "app/view/pages/assets/img/icon.png",
-            "installerHeaderIcon": "app/view/pages/assets/img/icon.png"
+            "installerIcon": "app/view/pages/assets/img/NutriCare-icon.ico",
+            "uninstallerIcon": "app/view/pages/assets/img/NutriCare-icon.ico",
+            "installerHeaderIcon": "app/view/pages/assets/img/NutriCare-icon.ico"
         },
         "linux": {
             "target": [
@@ -79,7 +79,7 @@
                     ]
                 }
             ],
-            "icon": "app/view/pages/assets/img/icon.png",
+            "icon": "app/view/pages/assets/img/NutriCare-icon.ico",
             "category": "Office"
         }
     },

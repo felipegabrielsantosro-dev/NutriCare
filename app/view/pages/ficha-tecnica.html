@@ -83,13 +83,16 @@
                     <label class="form-label small fw-bold">Matéria-Prima (Ingrediente)</label>
                     <select class="form-select" id="refeicao_itens"></select>
                 </div>
+
                 <div class="col-md-2">
                     <label class="form-label small fw-bold">Unidade</label>
-                    <input type="text" class="form-control" id="unidade" placeholder="Ex: g, kg, ml">
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label small fw-bold">Quantidade</label>
-                    <input type="number" step="0.001" class="form-control" id="quantidade">
+
+                    <select class="form-select" id="unidade">
+                        <option value="g">Gramas (g)</option>
+                        <option value="kg">Quilogramas (kg)</option>
+                        <option value="ml">Mililitros (ml)</option>
+                        <option value="l">Litros (L)</option>
+                    </select>
                 </div>
                 <div class="col-md-1 d-flex align-items-end">
                     <button type="button" class="btn btn-primary w-100" id="add-item">

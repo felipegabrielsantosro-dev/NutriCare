@@ -6,13 +6,42 @@ export default class FichaTecnica {
     static ingredientsTable = 'ficha_tecnica_ingredientes';
 
     static async find(where = {}) {
-        const data = await connection(this.table)
+
+        const fichas = await connection(this.table)
             .where(where)
             .orderBy('id', 'desc');
 
-        return { status: true, data };
-    }
+        for (const ficha of fichas) {
 
+            ficha.itens = await connection(this.ingredientsTable)
+                .leftJoin(
+                    'materia_prima',
+                    'materia_prima.id',
+                    `${this.ingredientsTable}.produto_id`
+                )
+                .where({
+                    ficha_tecnica_id: ficha.id
+                })
+                .select(
+                    `${this.ingredientsTable}.produto_id`,
+                    `${this.ingredientsTable}.quantidade`,
+                    `${this.ingredientsTable}.unidade`,
+                    `${this.ingredientsTable}.preco_unitario`,
+                    `${this.ingredientsTable}.valor_ingrediente`,
+
+                    'materia_prima.nome',
+                    'materia_prima.preco_compra'
+
+                );
+
+        }
+
+        return {
+            status: true,
+            data: fichas
+        };
+
+    }
     static async findById(id) {
         const data = await connection(this.table)
             .where({ id })
@@ -35,11 +64,15 @@ export default class FichaTecnica {
                 ficha_tecnica_id: id
             })
             .select(
-                `${this.ingredientsTable}.*`,
+                `${this.ingredientsTable}.produto_id`,
+                `${this.ingredientsTable}.quantidade`,
+                `${this.ingredientsTable}.unidade`,
+                `${this.ingredientsTable}.preco_unitario`,
+                `${this.ingredientsTable}.valor_ingrediente`,
+
                 'materia_prima.nome',
                 'materia_prima.preco_compra'
             );
-
         return {
             status: true,
             data
