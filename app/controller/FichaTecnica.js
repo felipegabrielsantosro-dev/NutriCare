@@ -28,12 +28,11 @@ export default class FichaTecnica {
                     `${this.ingredientsTable}.unidade`,
                     `${this.ingredientsTable}.preco_unitario`,
                     `${this.ingredientsTable}.valor_ingrediente`,
-
                     'materia_prima.nome',
                     'materia_prima.preco_compra'
-
                 );
 
+            console.log(JSON.stringify(ficha.itens, null, 2));
         }
 
         return {

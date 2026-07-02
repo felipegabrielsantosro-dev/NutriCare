@@ -45,7 +45,6 @@ async function carregarFichaTecnica() {
     if (!tbody) return;
 
     try {
-        // Tentativa com paginação básica
         let res = await api.fichaTecnica.find({ limit: 9999, offset: 0 });
         let lista = res?.data || res?.rows || (Array.isArray(res) ? res : []);
 
@@ -58,7 +57,6 @@ async function carregarFichaTecnica() {
     } catch (error) {
         console.warn("Erro ao buscar fichas com parâmetros, tentando busca limpa...", error);
         try {
-            // Fallback sem nenhum parâmetro
             const res = await api.fichaTecnica.find({});
             const lista = res?.data || res?.rows || (Array.isArray(res) ? res : []);
 
@@ -77,152 +75,124 @@ async function carregarFichaTecnica() {
     }
 }
 
-// Armazenamento temporário global para acessar os ingredientes sem precisar fazer outra requisição à API
 let fichasCarregadas = [];
 
 function renderizarFichas(tbody, lista) {
-    fichasCarregadas = lista; // Guarda a lista globalmente
+    fichasCarregadas = lista;
 
-    tbody.innerHTML = lista.map((f, index) => `
-        <tr>
-            <td>${f.id}</td>
-<td>
-    <strong>
-        ${f.nome_produto ||
-        f.produto ||
-        f.nome ||
-        (f.Produto?.nome) ||
-        "Sem Nome"
-        }
-    </strong>
-</td>            <td>${f.categoria ?? ''}</td>
-            <td>${f.rendimento || 1}</td>
-            <td>${f.peso_final || f.peso || ''}</td>
-            <td class="text-danger fw-bold">${moeda(f.custo_total || f.preco_custo)}</td>
-            <td class="text-primary fw-bold">${moeda(f.custo_unitario || (f.custo_total / (f.rendimento || 1)))}</td>
-            <td class="text-center">
-                <div class="btn-group btn-group-sm">
-                    <button class="btn btn-outline-primary" onclick="visualizarIngredientes(${index})" title="Ver Ingredientes">
-                        <i class="fa-solid fa-eye"></i>
-                    </button>
-                    <button class="btn btn-outline-danger" onclick="baixarPDFFichaUnica(${f.id})" title="Baixar PDF">
-                        <i class="fa-solid fa-download"></i>
-                    </button>
-                </div>
-            </td>
-        </tr>
-    `).join('');
+    tbody.innerHTML = lista.map((f, index) => {
+        const custoTotalFicha = Number(f.custo_total || f.preco_custo || f.custo || 0);
+        const rendimentoFicha = Number(f.rendimento) > 0 ? Number(f.rendimento) : 1;
+        const custoUnitarioCalculado = f.custo_unitario
+            ? Number(f.custo_unitario)
+            : (custoTotalFicha / rendimentoFicha);
+
+        return `
+            <tr>
+                <td>${f.id}</td>
+                <td>
+                    <strong>
+                        ${f.nome_produto || f.produto || f.nome || (f.Produto?.nome) || "Sem Nome"}
+                    </strong>
+                </td>
+                <td>${f.categoria ?? ''}</td>
+                <td>${rendimentoFicha}</td>
+                <td>${f.peso_final || f.peso || ''}</td>
+                <td class="text-danger fw-bold">${moeda(custoTotalFicha)}</td>
+                <td class="text-primary fw-bold">${moeda(custoUnitarioCalculado)}</td>
+                <td class="text-center">
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-primary" onclick="visualizarIngredientes(${index})" title="Ver Ingredientes">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                        <button class="btn btn-outline-danger" onclick="baixarPDFFichaUnica(${f.id})" title="Baixar PDF">
+                            <i class="fa-solid fa-download"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
 }
 
-// Função atualizada recebendo o INDEX para precisão total
-  window.visualizarIngredientes = function (index) {
-
+window.visualizarIngredientes = function (index) {
     const ficha = fichasCarregadas[index];
-
     if (!ficha) {
         alert("Ficha técnica não encontrada.");
         return;
     }
 
-    const nomeProduto =
-        ficha.nome_produto ||
-        ficha.produto ||
-        ficha.nome ||
-        "Sem Nome";
-
+    const nomeProduto = ficha.nome_produto || ficha.produto || ficha.nome || "Sem Nome";
     document.getElementById("nome-produto-modal").textContent = nomeProduto;
 
     let ingredientes = [];
-
-    if (Array.isArray(ficha.itens))
-        ingredientes = ficha.itens;
-    else if (Array.isArray(ficha.ingredientes))
-        ingredientes = ficha.ingredientes;
+    if (Array.isArray(ficha.itens)) ingredientes = ficha.itens;
+    else if (Array.isArray(ficha.ingredientes)) ingredientes = ficha.ingredientes;
 
     const tbody = document.getElementById("tbody-ingredientes-modal");
 
     if (!ingredientes.length) {
-
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="3" class="text-center">
-                    Nenhum ingrediente encontrado.
-                </td>
-            </tr>
-        `;
-
+        tbody.innerHTML = '<tr><td colspan="4" class="text-center">Nenhum ingrediente encontrado.</td></tr>';
     } else {
+        let totalIngredientes = 0;
 
-        tbody.innerHTML = ingredientes.map(i => {
+        const linhas = ingredientes.map(i => {
+            const nomeIngrediente = i.nome || i.nome_ingrediente || i.materia_prima || i.Alimento?.nome || "Ingrediente";
 
-            const nomeIngrediente =
-                i.nome ||
-                i.nome_ingrediente ||
-                "Ingrediente";
+            let rawQtd = String(i.quantidade ?? "").trim().toLowerCase();
+            let matchNumero = rawQtd.match(/[\d.,]+/);
+            let numeroTexto = matchNumero ? matchNumero[0] : "0";
+            let quantidade = parseFloat(numeroTexto.replace(",", ".")) || 0;
 
-            const quantidade = Number(i.quantidade || 0);
+            let unidadeBruta = i.unidade || i.unidade_medida || rawQtd.replace(/[\d.,\s]/g, "") || "g";
+            let unidade = unidadeBruta.trim().toLowerCase();
 
-            const unidade = (i.unidade || "g").toLowerCase();
+            let unidadeExibicao = "UN";
 
-            let quantidadeFormatada = "";
-
-            switch (unidade) {
-
-                case "g":
-                    quantidadeFormatada =
-                        quantidade.toLocaleString("pt-BR") + " g";
-                    break;
-
-                case "kg":
-                    quantidadeFormatada =
-                        quantidade.toLocaleString("pt-BR", {
-                            minimumFractionDigits: 0,
-                            maximumFractionDigits: 3
-                        }) + " kg";
-                    break;
-
-                case "ml":
-                    quantidadeFormatada =
-                        quantidade.toLocaleString("pt-BR") + " ml";
-                    break;
-
-                case "l":
-                    quantidadeFormatada =
-                        quantidade.toLocaleString("pt-BR", {
-                            minimumFractionDigits: 0,
-                            maximumFractionDigits: 3
-                        }) + " L";
-                    break;
-
-                default:
-                    quantidadeFormatada =
-                        quantidade.toLocaleString("pt-BR") + " " + unidade;
+            if (/^(g|gr|grama|gramas|g\.)$/.test(unidade)) {
+                unidadeExibicao = "G";
+            } else if (/^(ml|mls|mililitro|mililitros|ml\.)$/.test(unidade)) {
+                unidadeExibicao = "ML";
+            } else if (/^(kg|kilo|quilo|kilos|quilos)$/.test(unidade)) {
+                unidadeExibicao = "KG";
+            } else if (/^(l|litro|litros|l\.)$/.test(unidade)) {
+                unidadeExibicao = "L";
+            } else {
+                unidadeExibicao = unidade ? unidadeBruta.toUpperCase() : "UN";
             }
 
-            const custo =
-                i.preco_unitario ||
-                i.preco_compra ||
-                0;
+            const custoProporcional = Number(i.valor_ingrediente ?? i.total ?? 0);
+            totalIngredientes += custoProporcional;
+
+            // Altera para mostrar até 3 casas decimais se for um número quebrado, mas mantém limpo se for inteiro
+            const quantidadeFormatada = quantidade.toLocaleString("pt-BR", {
+                minimumFractionDigits: quantidade % 1 === 0 ? 0 : 3,
+                maximumFractionDigits: 3
+            });
 
             return `
-                <tr>
-                    <td>${nomeIngrediente}</td>
-                    <td>${quantidadeFormatada}</td>
-                    <td>${moeda(custo)}</td>
-                </tr>
-            `;
-
+            <tr>
+                <td>${nomeIngrediente}</td>
+                <td>${quantidadeFormatada}</td>
+                <td><span class="badge bg-secondary">${unidadeExibicao}</span></td>
+                <td class="text-success fw-bold">${moeda(custoProporcional)}</td>
+            </tr>`;
         }).join("");
 
+        tbody.innerHTML = `
+            ${linhas}
+            <tr class="table-dark fw-bold">
+                <td class="text-end">TOTAL DOS INGREDIENTES</td>
+                <td></td>
+                <td></td>
+                <td class="text-success fw-bold">${moeda(totalIngredientes)}</td>
+            </tr>`;
     }
 
-    new bootstrap.Modal(
-        document.getElementById("modalIngredientes")
-    ).show();
-
+    new bootstrap.Modal(document.getElementById("modalIngredientes")).show();
 };
 
-// Função para baixar o PDF exclusivo de uma única Ficha Técnica com seus ingredientes
+// ================= DOWNLOAD PDF FICHA ÚNICA (CORRIGIDO) =================
 window.baixarPDFFichaUnica = function (idFicha) {
     const ficha = fichasCarregadas.find(f => f.id === idFicha);
     if (!ficha) return;
@@ -243,295 +213,96 @@ window.baixarPDFFichaUnica = function (idFicha) {
                     </tr>
                 </thead>
                 <tbody>
-                    ${ingredientes.map(i => `
-                        <tr>
-                            <td>${i.nome || i.materia_prima || 'Ingrediente'}</td>
-                            <td>${i.quantidade || 0} ${i.unidade || 'g'}</td>
-                            <td>${moeda(i.preco_unitario || i.custo)}</td>
-                            <td>${moeda(i.custo_total || (i.quantidade * (i.preco_unitario || 0)))}</td>
-                        </tr>
-                    `).join('')}
+                    ${ingredientes.map(i => {
+                        const qtd = parseFloat(i.quantidade) || 0;
+                        const unidade = (i.unidade || i.unidade_medida || 'g').trim().toLowerCase();
+
+                        let mult = 1;
+                        if (unidade === 'g' || unidade === 'ml') mult = 0.001;
+
+                        const custoBase = parseFloat(
+                            i.preco_unitario ||
+                            i.preco_compra ||
+                            i.custo ||
+                            i.MateriaPrima?.preco_compra ||
+                            i.Produto?.preco_compra ||
+                            i.materia_prima?.preco_compra ||
+                            0
+                        );
+
+                        const totalItem = i.custo_total || (qtd * custoBase * mult);
+                        
+                        const qtdFormatada = qtd.toLocaleString("pt-BR", {
+                            minimumFractionDigits: 0,
+                            maximumFractionDigits: 3
+                        });
+
+                        return `
+                            <tr>
+                                <td>${i.nome || i.nome_ingrediente || i.materia_prima || 'Ingrediente'}</td>
+                                <td>${qtdFormatada} ${unidade.toUpperCase()}</td>
+                                <td>${moeda(custoBase)}</td>
+                                <td>${moeda(totalItem)}</td>
+                            </tr>
+                        `;
+                    }).join('')}
                 </tbody>
-            </table>
-        `;
+            </table>`;
     }
 
-    const html = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="utf-8">
-            <style>
-                body { font-family: Arial, sans-serif; padding: 20px; color: #333; }
-                h1 { color: #0d6efd; margin-bottom: 5px; }
-                h3 { color: #333; margin-top: 30px; border-bottom: 2px solid #0d6efd; padding-bottom: 5px; }
-                p { font-size: 13px; color: #666; }
-                table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-                th { background: #f8f9fa; color: #333; padding: 8px; border: 1px solid #ccc; text-align: left; font-size: 12px; }
-                td { padding: 8px; border: 1px solid #ccc; font-size: 12px; }
-                .grid { display: flex; gap: 20px; margin-top: 20px; }
-                .card { flex: 1; border: 1px solid #ccc; padding: 10px; border-radius: 5px; background: #fafafa; }
-            </style>
-        </head>
-        <body>
-            <h1>Ficha Técnica Otimizada: ${ficha.produto || ficha.nome}</h1>
-            <p>Gerado em: ${new Date().toLocaleString('pt-BR')}</p>
-            
-            <div class="grid">
-                <div class="card">
-                    <strong>Categoria:</strong> ${ficha.categoria ?? 'N/A'}<br>
-                    <strong>Rendimento:</strong> ${ficha.rendimento || 1} porções<br>
-                    <strong>Peso Final:</strong> ${ficha.peso_final || ficha.peso || 'N/A'}
-                </div>
-                <div class="card">
-                    <strong>Custo Total:</strong> <span style="color:#dc3545; font-weight:bold">${moeda(ficha.custo_total || ficha.preco_custo)}</span><br>
-                    <strong>Custo Unitário:</strong> <span style="color:#0d6efd; font-weight:bold">${moeda(ficha.custo_unitario || (ficha.custo_total / (ficha.rendimento || 1)))}</span>
-                </div>
-            </div>
+    const custoTotalFicha = Number(ficha.custo_total || ficha.preco_custo || ficha.custo || 0);
+    const rendimentoFicha = Number(ficha.rendimento) > 0 ? Number(ficha.rendimento) : 1;
+    const custoUnitarioCalculado = ficha.custo_unitario ? Number(ficha.custo_unitario) : (custoTotalFicha / rendimentoFicha);
 
-            ${tabelaIngredientesHTML}
-        </body>
-        </html>
-    `;
+    // HTML limpo de espaços em branco nas tags estruturais
+    const html = `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; color: #333; }
+        h1 { color: #0d6efd; margin-bottom: 5px; }
+        h3 { color: #333; margin-top: 30px; border-bottom: 2px solid #0d6efd; padding-bottom: 5px; }
+        p { font-size: 13px; color: #666; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th { background: #f8f9fa; color: #333; padding: 8px; border: 1px solid #ccc; text-align: left; font-size: 12px; }
+        td { padding: 8px; border: 1px solid #ccc; font-size: 12px; }
+        .grid { display: flex; gap: 20px; margin-top: 20px; }
+        .card { flex: 1; border: 1px solid #ccc; padding: 10px; border-radius: 5px; background: #fafafa; }
+    </style>
+</head>
+<body>
+    <h1>Ficha Técnica Otimizada: ${ficha.produto || ficha.nome || ficha.nome_produto}</h1>
+    <p>Gerado em: ${new Date().toLocaleString('pt-BR')}</p>
 
-    try {
-        api.report.print(html, { landscape: false });
-    } catch (error) {
-        console.error("Erro ao gerar PDF da ficha única:", error);
-        alert("Não foi possível gerar o PDF da ficha.");
-    }
+    <div class="grid">
+        <div class="card">
+            <strong>Categoria:</strong> ${ficha.categoria ?? 'N/A'}<br>
+            <strong>Rendimento:</strong> ${rendimentoFicha} porções<br>
+            <strong>Peso Final:</strong> ${ficha.peso_final || ficha.peso || 'N/A'}<br>
+        </div>
+        <div class="card">
+            <strong>Custo Total:</strong> ${moeda(custoTotalFicha)}<br>
+            <strong>Custo Unitário:</strong> ${moeda(custoUnitarioCalculado)}<br>
+        </div>
+    </div>
+
+    ${tabelaIngredientesHTML}
+</body>
+</html>`;
+
+    const blob = new Blob([html], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `Ficha_Tecnica_${ficha.id || ficha.nome || ficha.produto}.html`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
 };
 
-// ================= MATÉRIA PRIMA =================
-async function carregarMateriaPrima() {
-    const tbody = document.getElementById('tbody-materia-prima');
-    if (!tbody) return [];
-
-    try {
-        // Caso seu banco também rejeite parâmetros aqui, o bloco try/catch captura e trata
-        let res = await api.materiaPrima.find({ draw: 1, term: '', limit: 9999, offset: 0 });
-        let lista = res?.data || res?.rows || (Array.isArray(res) ? res : []);
-
-        if (!lista.length) {
-            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Nenhuma matéria-prima encontrada.</td></tr>';
-            return [];
-        }
-
-        renderizarMaterias(tbody, lista);
-        return lista;
-    } catch (err) {
-        console.warn('Erro ao carregar matéria-prima com filtros, tentando busca limpa...', err);
-        try {
-            let res = await api.materiaPrima.find({});
-            let lista = res?.data || res?.rows || (Array.isArray(res) ? res : []);
-
-            if (!lista.length) {
-                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Nenhuma matéria-prima encontrada.</td></tr>';
-                return [];
-            }
-
-            renderizarMaterias(tbody, lista);
-            return lista;
-        } catch (errGrave) {
-            console.error('Erro crítico matéria-prima:', errGrave);
-            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Erro ao carregar dados.</td></tr>';
-            return [];
-        }
-    }
-}
-
-function renderizarMaterias(tbody, lista) {
-    tbody.innerHTML = lista.map(m => `
-        <tr>
-            <td>${m.id}</td>
-            <td><strong>${m.nome || m.alimentos || ''}</strong></td>
-            <td>${m.categoria ?? ''}</td>
-            <td><span class="badge bg-secondary">${m.unidade_medida || m.unidade || 'g'}</span></td>
-            <td class="text-success fw-bold">${moeda(m.preco_compra || m.preco)}</td>
-        </tr>
-    `).join('');
-}
-
-// ================= PDF =================
-window.exportarPDF = function (tipo) {
-    const titulos = {
-        'produtos': 'Relatório de Produtos',
-        'ficha-tecnica': 'Relatório de Fichas Técnicas',
-        'materia-prima': 'Relatório de Matérias-Primas'
-    };
-
-    const idTabela = `relatorio-${tipo}`;
-    const tabela = document.getElementById(idTabela);
-
-    if (!tabela) {
-        alert(`Erro: A tabela com o ID "${idTabela}" não foi encontrada na página.`);
-        return;
-    }
-
-    const tabelaClone = tabela.cloneNode(true);
-    const html = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="utf-8">
-            <style>
-                body { font-family: Arial, sans-serif; padding: 20px; color: #333; }
-                h1 { color: #198754; margin-bottom: 5px; }
-                p { font-size: 12px; color: #666; margin-top: 0; margin-bottom: 20px; }
-                table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-                th { background: #198754; color: #fff; padding: 10px 8px; border: 1px solid #ccc; text-align: left; font-size: 13px; }
-                td { padding: 8px; border: 1px solid #ccc; font-size: 12px; }
-                .text-danger { color: #dc3545 !important; }
-                .text-primary { color: #0d6efd !important; }
-                .text-success { color: #198754 !important; }
-                .fw-bold { font-weight: bold !important; }
-            </style>
-        </head>
-        <body>
-            <h1>${titulos[tipo] || 'Relatório'}</h1>
-            <p>Gerado em: ${new Date().toLocaleString('pt-BR')}</p>
-            ${tabelaClone.outerHTML}
-        </body>
-        </html>
-    `;
-
-    try {
-        api.report.print(html, { landscape: tipo === 'ficha-tecnica' });
-    } catch (error) {
-        console.error("Erro ao invocar o método de PDF:", error);
-        alert("Não foi possível gerar o PDF. Detalhe: " + error.message);
-    }
-};
-
-async function carregarProdutosSelect() {
-
-    const select = document.getElementById("select-produto-ficha");
-
-    const res = await api.product.find({
-        draw: 1,
-        term: "",
-        limit: 9999,
-        offset: 0
-    });
-
-    const produtos = res.data || [];
-
-    select.innerHTML = '<option value="">Selecione um produto...</option>';
-
-    produtos.forEach(p => {
-
-        select.innerHTML += `
-            <option value="${p.id}">
-                ${p.alimentos}
-            </option>
-        `;
-
-    });
-
-}
-
-async function carregarIngredientesProduto(idProduto) {
-
-    const tbody = document.getElementById("tbody-ingredientes-modal");
-
-    tbody.innerHTML =
-        '<tr><td colspan="4">Carregando...</td></tr>';
-
-    const ficha = await api.fichaTecnica.buscarPorProduto(idProduto);
-
-    if (!ficha || !ficha.ingredientes.length) {
-
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="4" class="text-center">
-                    Nenhum ingrediente encontrado.
-                </td>
-            </tr>
-        `;
-
-        return;
-
-    }
-
-    tbody.innerHTML = ficha.ingredientes.map(i => `
-
-        <tr>
-
-            <td>${i.nome}</td>
-
-            <td>${i.quantidade}</td>
-
-            <td>${i.unidade}</td>
-
-            <td>${moeda(i.preco_unitario)}</td>
-
-        </tr>
-
-    `).join("");
-
-}
-
-window.imprimirIngredientes = function () {
-
-    const nomeProduto = document.getElementById("nome-produto-modal").textContent;
-
-    const tabela = document.querySelector("#modalIngredientes table").outerHTML;
-
-    const html = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <meta charset="utf-8">
-        <title>Ingredientes</title>
-
-        <style>
-            body{
-                font-family: Arial, sans-serif;
-                padding:30px;
-                color:#333;
-            }
-
-            h2{
-                margin-bottom:5px;
-            }
-
-            table{
-                width:100%;
-                border-collapse:collapse;
-                margin-top:20px;
-            }
-
-            th,td{
-                border:1px solid #ccc;
-                padding:8px;
-                text-align:left;
-            }
-
-            th{
-                background:#f2f2f2;
-            }
-        </style>
-
-    </head>
-
-    <body>
-
-        <h2>Ingredientes da Receita</h2>
-
-        <p><strong>Produto:</strong> ${nomeProduto}</p>
-
-        ${tabela}
-
-    </body>
-    </html>
-    `;
-
-    api.report.print(html, {
-        landscape: false
-    });
-
-};
-// Inicialização das funções existentes
-carregarProdutos();
-carregarFichaTecnica();
-carregarMateriaPrima();
+document.addEventListener('DOMContentLoaded', () => {
+    carregarProdutos();
+    carregarFichaTecnica();
+});     

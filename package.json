@@ -37,10 +37,14 @@
             "!app/**/*.map",
             "!app/**/test/**"
         ],
-        "extraFiles": [
+        "extraResources": [
             {
                 "from": ".env.production",
                 "to": ".env"
+            },
+            {
+                "from": "database",
+                "to": "database"
             }
         ],
         "win": {
